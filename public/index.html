@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅앱</title>
+    <link rel="stylesheet" href="./styles/style.css">
+</head>
+<body>
+    <div class="login">
+        <div class="menu">
+            <img class="back_main" src="svgs/back.svg" alt="">
+            <p id="app-title">로그인</p>
+        </div>
+        <strong>채팅앱에 오신 것을 환영합니다.</strong>
+        <div class="login-form">
+            <input type="text" id="input-id" placeholder="ID 입력">
+            <input type="password" id="input-pw" placeholder="비밀번호 입력">
+            <button id="input-login">로그인</button>
+            <p>계정이 없으시다면:</p>
+            <button id="input-register">회원가입</button>
+        </div>
+    </div>
+
+    <div class="banned-div" style="display: none;">
+        <div class="menu">
+            <img class="back_main" src="svgs/back.svg" alt="">
+            <p id="app-title">서비스 이용 불가 안내</p>
+        </div>
+        <strong>차단되었습니다.</strong>
+        <p><strong>정보통신망 이용촉진 및 정보보호 등에 관한 법률</strong>에 의거, 부적절한 표현 사용 혹은 사기로 의해 차단당하셨습니다.</p> <br>
+        <strong>사유:</strong> <p id="ban_reason">로딩중 입니다...</p>
+    </div>
+
+    <div class="main-menu">
+        <div class="menu">
+            <img class="back_main" src="svgs/back.svg" alt="">
+            <p id="app-title">MN Chat</p>
+        </div>
+        <strong>내 프로필</strong>
+        <div class="my_frofile">
+            <img src="./imgs/default_pfp.png" id="my_pf" class="user-icon">
+            <div class="user-info">
+                <strong class="user-name" id="my_name">로딩중 입니다...</strong>
+                <p class="user-description" id="my_desc">로딩중 입니다...</p>
+            </div>
+        </div>
+        <strong>친구</strong>
+        <div class="friends_container">
+
+        </div>
+        <strong>친구 추가</strong>
+        <div class="add-friend-form">
+            <input type="text" id="input-add-friend" placeholder="친구 아이디 입력">
+            <button id="input-add-friend-btn">친구 추가</button>
+        </div>
+    </div>
+
+    <div class="profile-edit" style="display: none;">
+        <div class="menu">
+            <img class="back_main" src="svgs/back.svg" alt="">
+            <p id="app-title">MN Chat</p>
+        </div>
+        <strong>프로필 수정</strong>
+    
+        <div class="my_profile">
+            <!-- 프로필 이미지 미리보기 -->
+            <img id="preview_profile_img" src="./imgs/default_pfp.png" class="user-icon">
+    
+            <!-- 이미지 업로드 -->
+            <input type="file" id="edit_profile_image" accept="image/*" style="margin-top:10px;">
+    
+            <!-- 상태 메시지 -->
+            <div class="user-info">
+                <strong>상태메시지 수정</strong> <br>
+                <input type="text" id="edit_profile_message" placeholder="여기에 상태메시지 입력"> <br>
+                <strong>언어 수정</strong> <br>
+                <select name="countrys" id="countrys">
+                    <option value="kr">한국어</option>
+                    <option value="en">English</option>
+                </select> <br>
+            </div>
+        </div>
+    
+        <button id="apply_profile_edit">적용</button>
+    </div>    
+
+    <div class="chatting" style="display: none;">
+        <div class="menu">
+            <img class="back_main" src="svgs/back.svg" alt="">
+            <p id="partner-id">로딩중입니다...</p>
+        </div>
+        <div class="container">
+        </div>
+        <div class="tools">
+            <div class="input-box">
+                <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                <button id="upload-btn"><img src="./svgs/image.svg" alt="이미지보내기"></button>
+                <input id="textbox" type="text" placeholder="여기에 메시지를 입력하세요.">
+                <button id="send_btn"><img src="./svgs/send.svg" alt="보내기"></button>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./scripts/chatting.js"></script>
+    <script src="./scripts/script.js"></script>
+</body>
+</html>

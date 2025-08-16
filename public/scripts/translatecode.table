@@ -1,0 +1,8 @@
+id,kr,en
+IDPWnotcorrect,아이디 혹은 비밀번호가 일치하지 않습니다.,ID or password does not match.
+SIGNUPok,회원가입 성공! 다시 로그인 해주세요.,Sign up successful! Please log in again.
+FRIENDok1,친구 추가 성공!,Friend added successfully!
+FRIENDok2,상대도 당신에게 친구추가를 하면 친구가 됩니다.,They also need to add you back to become friends.
+PFok,프로필 수정이 완료되었습니다.,Profile has been updated successfully.
+RefreshToApply,변경하기 위해 다시 로그인 해주십시오.,Please log in again to apply changes.
+"CheckTranslate","번역본 보기","View Translation"

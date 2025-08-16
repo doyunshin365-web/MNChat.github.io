@@ -4,9 +4,9 @@ const axios = require('axios');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const http = require('http');
-const User = require('./public/models/Users');
-const Chatting = require('./public/models/Chattings');
-const Ban = require('./public/models/Banned');
+const User = require('./docs/models/Users');
+const Chatting = require('./docs/models/Chattings');
+const Ban = require('./docs/models/Banned');
 const app = express();
 const server = http.createServer(app);
 
@@ -18,7 +18,7 @@ mongoose.connect('mongodb+srv://doyunshin365:mNCNCCIPky88bW8b@cluster0.l3vkr4h.m
   useUnifiedTopology: true
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'docs')));
 app.use(express.json());
 
 const PORT = 5000;

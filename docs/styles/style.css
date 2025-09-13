@@ -20,7 +20,7 @@ p {
     width: 100%;
 }
 
-.user-table, .my_frofile {
+.user-table, .my_frofile, .grouptable {
     margin-top: 15px;
     background-color: #212224;
     padding: 15px;
@@ -37,15 +37,15 @@ p {
     border-radius: 10px;
 }
 
-.user-info {
+.user-info, .group-info {
     flex: 1; /* 공간 차지해서 삭제 버튼 오른쪽으로 밀기 */
 }
 
-.user-name {
+.user-name, .group_name {
     font-size: 20px;
 }
 
-.delete-friend-btn,.translate-desc-btn {
+.delete-friend-btn,.translate-desc-btn, .delete-group-btn {
     background: none;
     border: none;
     cursor: pointer;
@@ -72,7 +72,7 @@ body {
     margin: 0;
 }
 
-.chatting, .main-menu, .login, .profile-edit {
+.chatting, .main-menu, .login, .profile-edit, .make_group_chat, .AIchatting {
     width: 460px;
     background-color: black;
     display: flex;
@@ -80,14 +80,14 @@ body {
     height: 100%;
 }
 
-.login-form, .add-friend-form {
+.login-form, .add-friend-form, .add-group-form, .make-group-chat-form {
     width: 100%;
     margin: 0 auto; /* 화면 가운데 정렬 */
     display: flex;
     flex-direction: column;
 }
 
-#input-id, #input-pw, #input-add-friend {
+#input-id, #input-pw, #input-add-friend, #input-add-group, #input-make-group-chat {
     margin-top: 15px;
     width: 100%;
     border: #212224 solid 2px;
@@ -98,7 +98,7 @@ body {
     box-sizing: border-box; /* padding 포함한 너비 계산 */
 }
 
-#input-login, #input-register, #input-add-friend-btn {
+#input-login, #input-register, #input-add-friend-btn, #input-add-group-btn, #make_group_chat, #apply_make_group_chat {
     margin-top: 15px;
     width: 100%;
     padding: 10px;
@@ -109,7 +109,7 @@ body {
     transition: all 0.3s ease;
 }
 
-#input-login:hover, #input-register:hover, #input-add-friend-btn:hover {
+#input-login:hover, #input-register:hover, #input-add-friend-btn:hover, #make_group_chat:hover, #apply_make_group_chat:hover {
     background-color: #0A84FF;
     color: white;
     transform: translateY(-3px); /* 살짝 위로~ 붕~ */
@@ -159,6 +159,19 @@ body {
     outline: none;
 }
 
+#AItextbox {
+    background: none;
+    border: none;
+    width: 80%;
+    color: white;
+    height: 40px;
+    padding-left: 15px;
+}
+
+#AItextbox:focus {
+    outline: none;
+}
+
 #send_btn {
     width: 35px;
     height: 35px;
@@ -166,6 +179,16 @@ body {
     border-radius: 100px;
     background-color: #0A84FF;
     margin-right: 5px;
+}
+
+#AIsend_btn {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 100px;
+    background-color: #0A84FF;
+    margin-right: 5px;
+    cursor: pointer;
 }
 
 #upload-btn {
@@ -178,6 +201,17 @@ body {
 }
 
 .container {
+    background-color: black;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.AIcontainer {
     background-color: black;
     width: 100%;
     display: flex;
@@ -202,6 +236,20 @@ body {
     line-height: 1.2;
 }
   
+  /* 내 채팅 (오른쪽 정렬) */
+.ai-my-chat {
+    margin-right: 10px;
+    align-self: flex-end;
+    background: #ff0a0a;
+    color: white;
+    padding: 10px;
+    border-radius: 100px;
+    max-width: 400px;
+    word-break: break-word;
+    font-size: 15px;
+    line-height: 1.2;
+}
+  
   /* 상대 채팅 (왼쪽 정렬) */
 .partner-chat { 
     align-self: flex-start;
@@ -215,7 +263,7 @@ body {
     line-height: 1.2;
 }
 
-.my-chat > *, .partner-chat > * {
+.my-chat > *, .partner-chat > *, .ai-my-chat > * {
     margin-left: 5px;
     margin-right: 5px;
 }
@@ -261,4 +309,161 @@ body {
 /* 클릭했을 때 살짝 눌리는 효과 */
 .show_translate:active {
     transform: scale(0.95);
+}
+
+.group_partner_name {
+    font-size: small;
+    color: gray;
+    margin-bottom: -8px;  /* 음수 마진으로 채팅 박스와 더 가깝게 */
+    margin-left: 5px;
+    display: block;      /* 혹시 줄 정렬 문제 있으면 강제로 블록으로 */
+}
+
+/* ---------------------- 화이트 모드 스타일 ---------------------- */
+
+/* 라이트모드 - 깔끔한 흰색 배경, 검정 텍스트 */
+body.light-mode,
+.chatting.light-mode,
+.main-menu.light-mode,
+.login.light-mode,
+.profile-edit.light-mode,
+.make_group_chat.light-mode {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* 라이트모드 강제 적용 - 배경만 하얀색으로 */
+body.light-mode {
+    background-color: #ffffff !important;
+}
+
+.light-mode .chatting,
+.light-mode .main-menu,
+.light-mode .login,
+.light-mode .profile-edit,
+.light-mode .make_group_chat,
+.light-mode .AIchatting {
+    background-color: #ffffff !important;
+}
+
+.light-mode .container {
+    background-color: #ffffff;
+}
+
+.light-mode .AIcontainer {
+    background-color: #ffffff;
+}
+
+.light-mode .user-table,
+.light-mode .my_frofile,
+.light-mode .grouptable {
+    background-color: #f5f5f5;
+    border: 1px solid #dddddd;
+}
+
+.light-mode .user-name,
+.light-mode .group_name {
+    color: #000000;
+}
+
+.light-mode .input-box {
+    background-color: #ffffff;
+    border: #cccccc solid 2px;
+}
+
+.light-mode #textbox {
+    color: #000000;
+}
+
+.light-mode #AItextbox {
+    color: #000000;
+}
+
+.light-mode #input-id,
+.light-mode #input-pw,
+.light-mode #input-add-friend,
+.light-mode #input-add-group,
+.light-mode #input-make-group-chat {
+    background-color: #ffffff;
+    color: #000000;
+    border: #cccccc solid 2px;
+}
+
+.light-mode #input-login,
+.light-mode #input-register,
+.light-mode #input-add-friend-btn,
+.light-mode #input-add-group-btn,
+.light-mode #make_group_chat,
+.light-mode #apply_make_group_chat {
+    background-color: #eeeeee;
+    color: #000000;
+}
+
+.light-mode #input-login:hover,
+.light-mode #input-register:hover,
+.light-mode #input-add-friend-btn:hover,
+.light-mode #make_group_chat:hover,
+.light-mode #apply_make_group_chat:hover {
+    background-color: #0A84FF;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 13, 153, 0.2);
+}
+
+.light-mode .menu {
+    background-color: #ffffff;
+    color: #000000;
+    border-bottom: 1px solid #cccccc;
+}
+
+.light-mode .tools {
+    background: #ffffff;
+    border-top: 1px solid #cccccc;
+}
+
+.light-mode .my-chat {
+    background-color: #0A84FF;
+    color: white;
+}
+
+.light-mode .ai-my-chat {
+    background-color: #ff0a0a;
+    color: white;
+}
+
+.light-mode .partner-chat {
+    background-color: #f5f5f5;
+    color: #000000;
+}
+
+.light-mode .delete-icon,
+.light-mode .translate-icon {
+    filter: invert(0%);
+}
+
+.light-mode .translated {
+    color: #666666;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+}
+
+.light-mode .show_translate {
+    color: #333333;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.light-mode .show_translate:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #000000;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.light-mode .group_partner_name {
+    color: #666666;
+}
+
+/* 라이트모드에서 뒤로가기 버튼 검정색으로 */
+.light-mode .back_main {
+    filter: invert(100%) !important;
 }

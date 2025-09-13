@@ -74,6 +74,29 @@ async function add_friend(id1, id2) {
     return data;
 }
 
+async function get_groups(id) {
+    const res = await fetch("/get_groups", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+    });
+
+    const data = await res.json();
+    return data;
+}
+
+
+async function get_groupchat_history(groupId) {
+    const res = await fetch("/get_groupchat_history", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId })
+    });
+
+    const data = await res.json();
+    return data;
+}
+
 async function get_chattings(id1, id2) {
     const res = await fetch("/get_chattings", {
         method: 'POST',
@@ -94,15 +117,16 @@ async function ban_check(id) {
     return data;
 }
 
-async function edit_profile(id, mes, pf, country) {
+async function edit_profile(id, mes, pf, country, light) {
     const res = await fetch("/edit_profile", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ id, mes, pf, country })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, mes, pf, country, light })
     });
     const data = await res.json();
     return data;
 }
+
 
 async function translate_text(country1, country2, content) {
     const res = await fetch("/translation", {  // 서버의 번역 엔드포인트
@@ -127,6 +151,68 @@ async function remove_friend(id1, id2) {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ id1, id2 })
+    });
+    const data = await res.json();
+    return data;
+}
+
+async function create_groupchat({ title, maker }) {
+    const res = await fetch("/create_groupchat", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, maker }),
+    });
+  
+    const data = await res.json();
+    return data;
+  }
+
+async function leave_groupchat(groupId, userId) {
+    const res = await fetch("/leave_groupchat", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ groupId, userId })
+    });
+    const data = await res.json();
+    return data;
+}
+  
+async function join_groupchat(groupId, userId) {
+    const res = await fetch("/join_groupchat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ groupId, userId }),
+    });
+
+    const data = await res.json();
+    return data;
+}
+
+async function get_ainova_history(id) {
+    const res = await fetch("/get_ainova_history", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    return data;
+}
+
+async function update_ainova_history(id, ainovaHistory) {
+    const res = await fetch("/update_ainova_history", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ id, ainovaHistory })
+    });
+    const data = await res.json();
+    return data;
+}
+
+async function nova_response(messages) {
+    const res = await fetch("/nova_response", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ messages })
     });
     const data = await res.json();
     return data;

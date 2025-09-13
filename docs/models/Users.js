@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
     desc: { type: String, required: true },
     friends: { type: Array, required: true },
     profileImage: { type: String, default: 'Default' },
-    country: { type: String, default: 'kr' }
+    country: { type: String, default: 'kr' },
+    light: { type: Boolean, default: false },
+    ainovaHistory: {type: Array, default: [{role: "assistant", content: "안녕!"}]}
 });
 
 module.exports = mongoose.model('User', userSchema);

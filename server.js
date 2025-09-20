@@ -8,6 +8,8 @@ const User = require("./docs/models/Users");
 const Chatting = require("./docs/models/Chattings");
 const GroupChatting = require("./docs/models/GroupChat");
 const Ban = require("./docs/models/Banned");
+const UserContact = require("./docs/models/Contact");
+const DevelopVoice = require("./docs/models/DevelopVoice");
 const app = express();
 const server = http.createServer(app);
 
@@ -396,6 +398,74 @@ app.post("/update_ainova_history", async (req, res) => {
     res.status(500).json({ message: "-1", error: "Server error" });
   }
 });
+
+app.post("/get_important_article", async (req, res) => {
+  try {
+    const latestImportant = await DevelopVoice.findOne({ important: true })
+      .sort({ date: -1 }) // 최신순 정렬
+      .exec();
+
+    if (!latestImportant) {
+      return res.status(404).json({ message: "-1", error: "No important article found" });
+    }
+
+    const preview =
+      latestImportant.content.length > 15
+        ? latestImportant.content.slice(0, 15) + "..."
+        : latestImportant.content;
+
+    res.json({
+      id: latestImportant._id,
+      title: latestImportant.title,
+      contentPreview: preview
+    });
+  } catch (err) {
+    console.error("중요 공지 가져오기 오류:", err);
+    res.status(500).json({ message: "-1", error: "Server error" });
+  }
+});
+
+app.post("/get_article_content", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const article = await DevelopVoice.findById(id).exec();
+
+    if (!article) {
+      return res.status(404).json({ message: "-1", error: "Article not found" });
+    }
+
+    res.json({
+      title: article.title,
+      content: article.content,
+      date: article.date.toISOString() // 혹은 toLocaleString()으로도 바꿀 수 있음
+    });
+  } catch (err) {
+    console.error("전체 글 조회 오류:", err);
+    res.status(500).json({ message: "-1", error: "Server error" });
+  }
+});
+
+app.post("/get_all_articles_meta", async (req, res) => {
+  try {
+    const articles = await DevelopVoice.find({}, { title: 1, date: 1, important: 1 })
+      .sort({ date: -1 })
+      .exec();
+
+    const result = articles.map((article) => ({
+      id: article._id,
+      title: article.title,
+      date: article.date,
+      important: article.important
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("전체 공지 목록 조회 오류:", err);
+    res.status(500).json({ message: "-1", error: "Server error" });
+  }
+});
+
 
 async function translation(country1, country2, content) {
   const url = "https://api.mistral.ai/v1/agents/completions";

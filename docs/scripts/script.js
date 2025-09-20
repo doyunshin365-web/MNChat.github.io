@@ -247,3 +247,14 @@ async function get_all_articles_meta() {
     const data = await res.json();
     return data;
 }
+
+async function submit_contact(user, content, email) {
+    const res = await fetch("/submit_contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user, content, email })
+    });
+    const data = await res.json();
+    return data;
+  }
+  

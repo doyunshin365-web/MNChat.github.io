@@ -466,6 +466,31 @@ app.post("/get_all_articles_meta", async (req, res) => {
   }
 });
 
+app.post("/submit_contact", async (req, res) => {
+  const { user, content, email } = req.body;
+
+  // 간단한 유효성 검사
+  if (!user || !content || !email) {
+    return res.status(400).json({ message: "-1", error: "필수 항목 누락" });
+  }
+
+  try {
+    const newContact = new Contact({
+      user,
+      content,
+      email,
+      date: new Date()
+    });
+
+    await newContact.save();
+
+    res.json({ message: "1", success: true });
+  } catch (err) {
+    console.error("문의 저장 중 오류:", err);
+    res.status(500).json({ message: "-1", error: "Server error" });
+  }
+});
+
 
 async function translation(country1, country2, content) {
   const url = "https://api.mistral.ai/v1/agents/completions";

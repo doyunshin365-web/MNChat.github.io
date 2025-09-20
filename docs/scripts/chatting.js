@@ -21,6 +21,7 @@ let friends_list = document.querySelector(".friends_container");
 let back_btn = document.querySelectorAll(".back_main");
 let developVoiceContent_div = document.querySelector(".developVoiceContent");
 let developVoice_div = document.querySelector(".developVoice");
+let userVoice_div = document.querySelector(".user_voice");
 let partner_id = "";
 const socket = io();
 let partner_lang = "";
@@ -349,6 +350,7 @@ async function enter_chat_room(partner) {
     chatting_div.querySelector(".back_main").style.display = "flex";
     developVoiceContent_div.style.display = "none";
     developVoice_div.style.display = "none";
+    userVoice_div.style.display = 'none';
     container.innerHTML = "";
 
     // ✅ 먼저 partner_lang 세팅
@@ -391,6 +393,7 @@ async function enter_groupchat_room(groupId) {
     chatting_div.querySelector(".back_main").style.display = "flex";
     developVoiceContent_div.style.display = "none";
     developVoice_div.style.display = "none";
+    userVoice_div.style.display = 'none';
     container.innerHTML = "";
     now_group = groupId
 
@@ -463,6 +466,20 @@ async function enter_groupchat_room(groupId) {
     console.log(chat_method);
 }
 
+async function display_uservoice() {
+    make_group_chat_div.style.display = "none";
+    chatting_div.style.display = "none";
+    edit_profile_div.style.display = "none";
+    mainmenu_div.style.display = "none";
+    login_div.style.display = "none";
+    aichatting_div.style.display = "none";
+    developVoice_div.style.display = "none";
+    userVoice_div.style.display = 'flex';
+    developVoiceContent_div.style.display = "none";
+    userVoice_div.querySelector('textarea').value = '';
+    userVoice_div.querySelector('input').value = '';
+}
+
 async function display_developervoice() {
     make_group_chat_div.style.display = "none";
     chatting_div.style.display = "none";
@@ -471,6 +488,7 @@ async function display_developervoice() {
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     developVoice_div.style.display = "flex";
+    userVoice_div.style.display = 'none';
     developVoiceContent_div.style.display = "none";
 
     const container = document.querySelector(".contentContainer");
@@ -529,6 +547,7 @@ async function display_developervoice_content(id) {
     mainmenu_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
+    userVoice_div.style.display = 'none';
     developVoice_div.style.display = "none";
     developVoiceContent_div.style.display = "flex";
     // API 호출
@@ -563,6 +582,7 @@ async function display_friendlist() {
     developVoiceContent_div.style.display = "none";
     developVoice_div.style.display = "none";
     mainmenu_div.querySelector(".back_main").style.display = "none";
+    userVoice_div.style.display = 'none';
     friends_list.innerHTML = "";
 
     const data = await get_friends(my_id);
@@ -753,6 +773,7 @@ async function enter_ai_chat_room() {
     aichatting_div.style.display = "flex";
     developVoiceContent_div.style.display = "none";
     developVoice_div.style.display = "none";
+    userVoice_div.style.display = 'none';
     
     // AI 채팅 히스토리 불러오기
     const data = await get_ainova_history(my_id);
@@ -796,6 +817,7 @@ async function display_grouplist() {
     developVoice_div.style.display = "none";
     mainmenu_div.querySelector(".back_main").style.display = "none";
     groups_container.innerHTML = "";
+    userVoice_div.style.display = 'none';
 
     const data = await get_groups(my_id);
     if (data.message !== "2") {
@@ -1191,6 +1213,7 @@ function display_making_group() {
     aichatting_div.style.display = "none";
     developVoiceContent_div.style.display = "none";
     developVoice_div.style.display = "none";
+    userVoice_div.style.display = 'none';
     make_group_chat_div.querySelector(".back_main").style.display = "flex";
 }
 
@@ -1229,8 +1252,38 @@ document.querySelectorAll(".menu_info").forEach((ele) => {
         const menuType = ele.querySelector(".menu_desc").dataset.menu;
         if (menuType === "developer_voice") {
             display_developervoice();
-        } else {
+        } else if (menuType === "user_voice") {
+            display_uservoice();
+        }else {
             alert("해당 기능은 아직 완성되지 않았습니다.")
         }
     });
+});
+
+document.querySelector(".submit_contact").addEventListener("click", async () => {
+    const email = document.querySelector("#contact_email").value.trim();
+    const content = document.querySelector("#contact_content").value.trim();
+    const check = document.querySelector("#contact_check").checked;
+
+    if (!check) {
+        alert("장난글이 아니라는 체크를 해주세요!");
+        return;
+    }
+
+    if (!email || !content) {
+        alert("이메일과 내용을 모두 입력해주세요.");
+        return;
+    }
+
+    const result = await submit_contact(my_id, content, email);
+
+    if (result && result.success) {
+        alert("문의가 성공적으로 접수되었습니다! ✉️");
+        // 초기화도 가능:
+        document.querySelector("#contact_email").value = "";
+        document.querySelector("#contact_content").value = "";
+        document.querySelector("#contact_check").checked = false;
+    } else {
+        alert("문의 전송에 실패했습니다. 다시 시도해주세요. ⚠️");
+    }
 });

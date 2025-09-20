@@ -1,5 +1,6 @@
 // PORT 3000 : 채팅 앱
 
+
 // 변수 지정
 let my_light = false;
 let now_group = "";
@@ -18,6 +19,8 @@ let textbox = document.querySelector("#textbox");
 let partner_id_render = document.querySelector("#partner-id");
 let friends_list = document.querySelector(".friends_container");
 let back_btn = document.querySelectorAll(".back_main");
+let developVoiceContent_div = document.querySelector(".developVoiceContent");
+let developVoice_div = document.querySelector(".developVoice");
 let partner_id = "";
 const socket = io();
 let partner_lang = "";
@@ -33,6 +36,8 @@ let CheckTranslate = "번역본 보기";
 let GroupChatOK2 = "그룹챗 만들기 성공!";
 
 console.log("콘솔 꺼라. 뭐 입력했다가 밴먹을 수 있어");
+
+
 
 /**
  * 상대가 보낸 이미지를 채팅 화면에 띄워주는 함수.
@@ -342,6 +347,8 @@ async function enter_chat_room(partner) {
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     chatting_div.querySelector(".back_main").style.display = "flex";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
     container.innerHTML = "";
 
     // ✅ 먼저 partner_lang 세팅
@@ -382,6 +389,8 @@ async function enter_groupchat_room(groupId) {
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     chatting_div.querySelector(".back_main").style.display = "flex";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
     container.innerHTML = "";
     now_group = groupId
 
@@ -454,6 +463,93 @@ async function enter_groupchat_room(groupId) {
     console.log(chat_method);
 }
 
+async function display_developervoice() {
+    make_group_chat_div.style.display = "none";
+    chatting_div.style.display = "none";
+    edit_profile_div.style.display = "none";
+    mainmenu_div.style.display = "none";
+    login_div.style.display = "none";
+    aichatting_div.style.display = "none";
+    developVoice_div.style.display = "flex";
+    developVoiceContent_div.style.display = "none";
+
+    const container = document.querySelector(".contentContainer");
+    container.innerHTML = ""; // 기존 내용 초기화
+
+    const articles = await get_all_articles_meta();
+
+    // 최신순 정렬 (date 내림차순)
+    articles.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    for (const article of articles) {
+        // div 생성
+        const articleDiv = document.createElement("div");
+        articleDiv.className = article.important ? "importantArticle" : "Article";
+
+        // 아이콘
+        const img = document.createElement("img");
+        img.src = "../svgs/bell.svg";
+        img.className = article.important ? "bell-icon" : "bell-icon-default";
+
+        // 타이틀
+        const strong = document.createElement("strong");
+        strong.textContent = article.title;
+        strong.dataset.contentid = article.id;
+
+        // 날짜
+        const p = document.createElement("p");
+        const date = new Date(article.date);
+        p.textContent = date.toLocaleDateString("ko-KR", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+
+        // 이벤트 추가 (누르면 전체 내용 보여줌)
+        strong.addEventListener("click", () => {
+            display_developervoice_content(article.id);
+        });
+
+        // 조립
+        articleDiv.appendChild(img);
+        articleDiv.appendChild(strong);
+        articleDiv.appendChild(p);
+        container.appendChild(articleDiv);
+    }
+}
+
+document.querySelector(".back_developvoice").addEventListener('click', ()=>{
+    display_developervoice();
+});
+
+async function display_developervoice_content(id) {
+    make_group_chat_div.style.display = "none";
+    chatting_div.style.display = "none";
+    edit_profile_div.style.display = "none";
+    mainmenu_div.style.display = "none";
+    login_div.style.display = "none";
+    aichatting_div.style.display = "none";
+    developVoice_div.style.display = "none";
+    developVoiceContent_div.style.display = "flex";
+    // API 호출
+    const article = await get_article_content(id);
+
+    // 요소 찾기
+    const acontainer = document.querySelector(".voicecontent");
+    const titleEl = acontainer.querySelector("strong");
+    const contentEl = acontainer.querySelector("p");
+    
+    // 줄바꿈 처리
+    const converted = article.content
+        .replace(/\r\n|\n|\r/g, "<br>")
+        .replace(/\\n/g, "<br>");
+    
+    titleEl.textContent = article.title;
+    contentEl.innerHTML = converted;
+    
+
+}   
+
 /**
  * 친구 목록 띄워주는 함수
  */
@@ -464,6 +560,8 @@ async function display_friendlist() {
     mainmenu_div.style.display = "flex";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
     mainmenu_div.querySelector(".back_main").style.display = "none";
     friends_list.innerHTML = "";
 
@@ -569,27 +667,39 @@ async function display_friendlist() {
             }
         });
     });
-    // 이미 Nova AI 항목이 있으면 추가하지 않음
-    if (!document.querySelector(".EnterAIChat")) {
-        friends_list.insertAdjacentHTML(
-            "beforebegin",
-            `
-            <div class="user-table EnterAIChat" data-id="NovaAI">
-                <img src="../imgs/default_pfp.png" class="user-icon">
-                <div class="user-info">
-                    <strong class="user-name">Nova AI</strong>
-                    <p class="user-description">새로운 AI 친구, Nova를 만나보세요.</p>
-                </div>
+    friends_list.insertAdjacentHTML(
+        "beforebegin",
+        `
+        <div class="user-table EnterAIChat" data-id="NovaAI">
+            <img src="../imgs/default_pfp.png" class="user-icon">
+            <div class="user-info">
+                <strong class="user-name">Nova AI</strong>
+                <p class="user-description">새로운 AI 친구, Nova를 만나보세요.</p>
             </div>
-            `
-        );
-    }
-
+        </div>
+    `,
+    );
     // ✅ 채팅방 입장 이벤트
     document.querySelectorAll(".EnterAIChat").forEach((ele) => {
         ele.addEventListener("click", () => {
             enter_ai_chat_room();
         });
+    });
+
+    const Aritcledata = await get_important_article();
+    const container = document.querySelector(".importantArticle");
+
+    if (!container || !Aritcledata) return;
+
+    const titleEl = container.querySelector("strong");
+    const contentEl = container.querySelector("p");
+
+    titleEl.textContent = Aritcledata.title;
+    titleEl.dataset.contentid = Aritcledata.id;
+    contentEl.textContent = Aritcledata.contentPreview;
+
+    document.querySelector('.importantArticle').addEventListener('click', async ()=>{
+        display_developervoice_content(titleEl.dataset.contentid);
     });
 }
 document.querySelector('#AIsend_btn').addEventListener('click', async () => {
@@ -641,6 +751,8 @@ async function enter_ai_chat_room() {
     mainmenu_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "flex";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
     
     // AI 채팅 히스토리 불러오기
     const data = await get_ainova_history(my_id);
@@ -680,6 +792,8 @@ async function display_grouplist() {
     mainmenu_div.style.display = "flex";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
     mainmenu_div.querySelector(".back_main").style.display = "none";
     groups_container.innerHTML = "";
 
@@ -972,6 +1086,8 @@ function display_edit_profile() {
     login_div.style.display = "none";
     edit_profile_div.style.display = "flex";
     aichatting_div.style.display = "none";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
 }
 
 //data.message
@@ -1073,6 +1189,8 @@ function display_making_group() {
     login_div.style.display = "none";
     make_group_chat_div.style.display = "flex";
     aichatting_div.style.display = "none";
+    developVoiceContent_div.style.display = "none";
+    developVoice_div.style.display = "none";
     make_group_chat_div.querySelector(".back_main").style.display = "flex";
 }
 
@@ -1105,3 +1223,14 @@ function handleBackClick() {
 }
 
 //AI
+// ✅ 메뉴 클릭 이벤트 바인딩
+document.querySelectorAll(".menu_info").forEach((ele) => {
+    ele.addEventListener("click", () => {
+        const menuType = ele.querySelector(".menu_desc").dataset.menu;
+        if (menuType === "developer_voice") {
+            display_developervoice();
+        } else {
+            alert("해당 기능은 아직 완성되지 않았습니다.")
+        }
+    });
+});

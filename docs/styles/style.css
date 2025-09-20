@@ -20,12 +20,22 @@ p {
     width: 100%;
 }
 
-.user-table, .my_frofile, .grouptable {
+.user-table, .my_frofile, .grouptable, .menutable {
     margin-top: 15px;
     background-color: #212224;
     padding: 15px;
     border-radius: 15px; /* 너무 둥글면 안 예쁘니 조금 줄임 */
     display: flex;
+    align-items: center;
+    justify-content: space-between; /* 왼쪽: 친구정보 / 오른쪽: 삭제버튼 */
+}
+
+.Article {
+    margin-top: 15px;
+    background-color: #212224;
+    padding: 15px;
+    border-radius: 15px; /* 너무 둥글면 안 예쁘니 조금 줄임 */
+    display: block;
     align-items: center;
     justify-content: space-between; /* 왼쪽: 친구정보 / 오른쪽: 삭제버튼 */
 }
@@ -37,11 +47,11 @@ p {
     border-radius: 10px;
 }
 
-.user-info, .group-info {
+.user-info, .group-info, .menu_desc {
     flex: 1; /* 공간 차지해서 삭제 버튼 오른쪽으로 밀기 */
 }
 
-.user-name, .group_name {
+.user-name, .group_name, .menu_name {
     font-size: 20px;
 }
 
@@ -71,7 +81,6 @@ body {
     height: 100%;
     margin: 0;
 }
-
 .chatting, .main-menu, .login, .profile-edit, .make_group_chat, .AIchatting {
     width: 460px;
     background-color: black;
@@ -79,6 +88,14 @@ body {
     flex-direction: column;
     height: 100%;
 }
+.developVoice, .developVoiceContent {
+    width: 460px;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 
 .login-form, .add-friend-form, .add-group-form, .make-group-chat-form {
     width: 100%;
@@ -319,6 +336,73 @@ body {
     display: block;      /* 혹시 줄 정렬 문제 있으면 강제로 블록으로 */
 }
 
+.contact_form {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.contact_textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 15px;
+    border-radius: 15px;
+    background-color: #000;
+    border: 2px solid #212224;
+    color: white;
+    resize: vertical;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.contact_checkbox_wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact_checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #0A84FF; /* 체크박스 색상 */
+}
+
+.contact_label {
+    color: white;
+    font-size: 14px;
+}
+
+.submit_contact {
+    width: 100%;
+    padding: 10px;
+    background-color: #eeeeee;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.submit_contact:hover {
+    background-color: #0A84FF;
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 13, 153, 0.2);
+}
+
+.contact_input {
+    margin-top: 15px;
+    width: 100%;
+    border: #212224 solid 2px;
+    border-radius: 100px;
+    background-color: #000000;
+    padding: 10px 15px;
+    color: white;
+    box-sizing: border-box;
+    font-size: 15px;
+}
+
+
 /* ---------------------- 화이트 모드 스타일 ---------------------- */
 
 /* 라이트모드 - 깔끔한 흰색 배경, 검정 텍스트 */
@@ -342,7 +426,9 @@ body.light-mode {
 .light-mode .login,
 .light-mode .profile-edit,
 .light-mode .make_group_chat,
-.light-mode .AIchatting {
+.light-mode .AIchatting,
+.light-mode .developVoice,
+.light-mode .developVoiceContent {
     background-color: #ffffff !important;
 }
 
@@ -356,13 +442,17 @@ body.light-mode {
 
 .light-mode .user-table,
 .light-mode .my_frofile,
-.light-mode .grouptable {
+.light-mode .grouptable,
+.light-mode .menutable,
+.light-mode .Article {
     background-color: #f5f5f5;
     border: 1px solid #dddddd;
+
 }
 
 .light-mode .user-name,
-.light-mode .group_name {
+.light-mode .group_name,
+.light-mode .menu_name {
     color: #000000;
 }
 
@@ -464,6 +554,85 @@ body.light-mode {
 }
 
 /* 라이트모드에서 뒤로가기 버튼 검정색으로 */
-.light-mode .back_main {
+.light-mode .back_main,
+.light-mode .back_developvoice {
     filter: invert(100%) !important;
 }
+
+
+.light-mode .contact_textarea {
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #cccccc;
+}
+
+.light-mode .contact_label {
+    color: #000000;
+}
+
+.light-mode .contact_checkbox {
+    accent-color: #0A84FF;
+}
+
+
+.light-mode .contact_input {
+    background-color: #ffffff;
+    color: #000000;
+    border: #cccccc solid 2px;
+}
+
+.bell-icon {
+    width: 24px;
+    height: 24px;
+    -webkit-mask: url('../svgs/bell.svg') no-repeat center;
+    mask: url('../svgs/bell.svg') no-repeat center;
+    background-color: #d8000c;
+}
+
+.bell-icon-default {
+    width: 24px;
+    height: 24px;
+    -webkit-mask: url('../svgs/bell.svg') no-repeat center;
+    mask: url('../svgs/bell.svg') no-repeat center;
+    background-color: #242424;
+}
+
+.importantArticle {
+    border: 2px solid #ff4d4d;       /* 빨간 테두리 */
+    background-color: #ffecec;       /* 연한 빨간 배경 */
+    color: #d8000c;                  /* 강렬한 빨간 글씨 */
+    padding: 15px;
+    border-radius: 12px;
+    display: block;
+    align-items: center;
+    gap: 10px;
+}
+
+.voicecontent {
+    background-color: #fdf6f6;           /* 살짝 분홍빛 */
+    border: 2px solid #ffb3b3;           /* 부드러운 빨강 */
+    border-radius: 20px;
+    padding: 20px;
+    margin: 10px;
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 100%;
+  }
+  
+  .voice-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #d8000c;
+    border-bottom: 1px solid #ffc0c0;
+    padding-bottom: 5px;
+  }
+  
+  .voice-text {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.6;
+    white-space: pre-wrap; /* 줄바꿈 + 공백 유지 */
+  }
+  

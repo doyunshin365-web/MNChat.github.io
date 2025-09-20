@@ -217,3 +217,33 @@ async function nova_response(messages) {
     const data = await res.json();
     return data;
 }
+
+async function get_important_article() {
+    const res = await fetch("/get_important_article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+    });
+    const data = await res.json();
+    return data;
+}
+
+async function get_article_content(id) {
+    const res = await fetch("/get_article_content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    return data;
+}
+
+async function get_all_articles_meta() {
+    const res = await fetch("/get_all_articles_meta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+    });
+    const data = await res.json();
+    return data;
+}

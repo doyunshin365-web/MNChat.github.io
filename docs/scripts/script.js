@@ -117,11 +117,11 @@ async function ban_check(id) {
     return data;
 }
 
-async function edit_profile(id, mes, pf, country, light) {
+async function edit_profile(id, mes, pf, country, light, TP) {
     const res = await fetch("/edit_profile", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, mes, pf, country, light })
+        body: JSON.stringify({ id, mes, pf, country, light, TP })
     });
     const data = await res.json();
     return data;

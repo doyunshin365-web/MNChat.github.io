@@ -12,7 +12,7 @@
                 <img class="back_main" src="svgs/back.svg" alt="" />
                 <p id="app-title">로그인</p>
             </div>
-            <strong>채팅앱에 오신 것을 환영합니다.</strong>
+            <strong>MN Chat에 오신 것을 환영합니다.</strong>
             <div class="login-form">
                 <input type="text" id="input-id" placeholder="ID 입력" />
                 <input
@@ -23,6 +23,15 @@
                 <button id="input-login">로그인</button>
                 <p>계정이 없으시다면:</p>
                 <button id="input-register">회원가입</button>
+                
+                <!-- 언어 선택 -->
+                <div style="margin-top: 15px; text-align: center;">
+                    <label for="language-select" style="color: #ccc; font-size: 0.9rem;">Language / 언어:</label>
+                    <select id="language-select" style="margin-top: 5px; padding: 5px; border-radius: 5px; background-color: #333; color: white; border: 1px solid #555;">
+                        <option value="kr">한국어</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -64,10 +73,12 @@
                 <p id="app-title">MN Chat</p>
             </div>
             <br>
-            <div class="importantArticle">
+            <div class="importantArticle" style="display: flex;">
                 <img src="../svgs/bell.svg" class="bell-icon">
-                <strong>로딩중 입니다...</strong>
-                <p>로딩중 입니다...</p>
+                <div style="display: block;">
+                    <strong>로딩중 입니다...</strong>
+                    <p>로딩중 입니다...</p>
+                </div>
             </div>
             <strong>내 프로필</strong>
             <div class="my_frofile">
@@ -131,7 +142,7 @@
                      <p class="menu_desc" data-menu="developer_voice">개발자야 너 뭐하냐</p>
                  </div>
              </div>
-             <br>
+            <br>
         </div>
         <div class="profile-edit" style="display: none">
             <div class="menu">
@@ -176,6 +187,10 @@
                         <input type="checkbox" id="light-mode-toggle">
                         라이트모드
                     </label>
+                    <label>
+                        <input type="checkbox" id="translate-preview-toggle">
+                        번역 미리보기
+                    </label>
                     <br />
                 </div>
             </div>
@@ -189,6 +204,15 @@
                 <p id="partner-id">로딩중입니다...</p>
             </div>
             <div class="container"></div>
+            <div class="previewtranslate" style="display: none;">
+                <strong>번역 미리보기</strong>
+                <p>AI는 실수할 수 있습니다. AI번역 결과를 보시고, 다시 생성할지 결정해주십시오.</p>
+                <p id="translation_result"><!-- JS가 채울거임 --></p>
+                <div class="buttons">
+                    <button id="confirm_translate">확인</button>
+                    <button id="reload_translate">재생성</button>
+                </div>
+            </div>
             <div class="tools">
                 <div class="input-box">
                     <input
@@ -261,6 +285,7 @@
             <div class="contentContainer">
                 
             </div>
+            <p id="information" style="display: none;">If you are using a language other than Korean, posts may appear with a slight delay due to translation.</p>
         </div>
 
         <div class="developVoiceContent" style="display: none">
@@ -273,7 +298,7 @@
                 <p class="voice-text">내용 로드중</p>
             </div>
         </div>
-
+        
         <script src="socket.io/socket.io.js"></script>
         <script src="scripts/chatting.js"></script>
         <script src="scripts/script.js"></script>

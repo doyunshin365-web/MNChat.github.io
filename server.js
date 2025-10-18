@@ -8,7 +8,7 @@ const User = require("./docs/models/Users");
 const Chatting = require("./docs/models/Chattings");
 const GroupChatting = require("./docs/models/GroupChat");
 const Ban = require("./docs/models/Banned");
-const UserContact = require("./docs/models/Contact");
+const Contact = require("./docs/models/Contact");
 const DevelopVoice = require("./docs/models/DevelopVoice");
 const app = express();
 const server = http.createServer(app);
@@ -26,6 +26,9 @@ mongoose.connect(
 
 app.use(express.static(path.join(__dirname, "docs")));
 app.use(express.json());
+
+const cors = require("cors");
+app.use(cors()); // 쓸때만 켜두기ㅡㅡ
 
 const PORT = 5000;
 
@@ -52,8 +55,9 @@ app.post("/login", async (req, res) => {
   const pf = user.profileImage;
   const lang = user.country;
   const light = user.light;
+  const TP = user.translatepreview
 
-  res.json({ message: "2", desc, pf, lang, light });
+  res.json({ message: "2", desc, pf, lang, light, TP });
 });
 
 app.post("/get_friends", async (req, res) => {
@@ -128,13 +132,14 @@ app.post("/remove_friend", async (req, res) => {
 });
 
 app.post("/edit_profile", async (req, res) => {
-  const { id, mes, pf, country, light } = req.body;
+  const { id, mes, pf, country, light, TP } = req.body;
   const user = await User.findOne({ id });
   if (!user) return res.status(400).json({ message: "-1" });
   user.desc = mes;
   user.profileImage = pf;
   user.country = country;
   user.light = light; // 🌟 추가!
+  user.translatepreview = TP;
   await user.save();
   res.status(200).json({ message: "1" });
 });
@@ -306,37 +311,6 @@ app.post("/ban_check", async (req, res) => {
   if (exists) return res.status(400).json({ message: "1" });
   res.json({ message: "0" });
 });
-
-async function send_chatting(id1, id2, content, method) {
-  console.log(id1,id2,content,method)
-  if (method === 0) {
-    const chatting = await Chatting.findOne({
-      $or: [
-        { partner1: id1, partner2: id2 },
-        { partner1: id2, partner2: id1 },
-      ],
-    });
-
-    if (!chatting) {
-      console.log("Wrong Chatting");
-      return;
-    }
-
-    chatting.chattings.push({ id: id1, content });
-    await chatting.save();
-  } else if (method === 1) {
-    const groupChat = await GroupChatting.findById(id2);
-
-    if (!groupChat) {
-      console.log("Wrong GroupChat");
-      return;
-    }
-  
-    // 메시지 저장
-    groupChat.chattings.push({ id: id1, content });
-    await groupChat.save();
-  }
-}
 
 app.post("/translation", async (req, res) => {
   const { country1, country2, content } = req.body;
@@ -557,6 +531,62 @@ async function nova_response(messages) {
   }
 }
 
+async function send_chatting(id1, id2, content, method, foreign_ver) {
+  console.log(id1,id2,content,method)
+  if (method === 0) {
+    const chatting = await Chatting.findOne({
+      $or: [
+        { partner1: id1, partner2: id2 },
+        { partner1: id2, partner2: id1 },
+      ],
+    });
+
+    if (!chatting) {
+      console.log("Wrong Chatting");
+      return;
+    }
+
+    chatting.chattings.push({ id: id1, content, foreign_ver });
+    await chatting.save();
+  } else if (method === 1) {
+    const groupChat = await GroupChatting.findById(id2);
+
+    if (!groupChat) {
+      console.log("Wrong GroupChat");
+      return;
+    }
+  
+    // 메시지 저장
+    groupChat.chattings.push({ id: id1, content, foreign_ver });
+    await groupChat.save();
+  }
+}
+// ADMIN PANNEL
+app.post("/api/developvoice", async (req, res) => {
+  const { title, content, important, key } = req.body;
+  if (key == "ADMIN0011992") {
+    try {
+
+      if (!title || !content) {
+        return res.status(400).json({ message: "Title and content are required." });
+      }
+
+      const newPost = new DevelopVoice({
+        title,
+        content,
+        date: new Date(),
+        important: important || false,
+      });
+
+      await newPost.save();
+      res.status(201).json({ message: "Announcement successfully posted!" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error." });
+    }
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`server is running ${PORT}`);
 });
@@ -565,9 +595,9 @@ io.on("connection", (socket) => {
   socket.on("chatting", (data) => {
     console.log(data);
     if (data.method === 1) {
-      send_chatting(data.from, data.to, data.content, data.method, data.my_lang);
+      send_chatting(data.from, data.to, data.content, data.method, data.my_lang, data.foreign_ver);
     } else {
-      send_chatting(data.from, data.to, data.content, data.method);
+      send_chatting(data.from, data.to, data.content, data.method, data.foreign_ver);
     }    
     io.emit("chatting", data);
   });

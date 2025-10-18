@@ -36,6 +36,30 @@ let RefreshToApply = "변경하기 위해 다시 로그인 해주십시오.";
 let CheckTranslate = "번역본 보기";
 let GroupChatOK2 = "그룹챗 만들기 성공!";
 
+// 추가 alert 메시지 변수들
+let GroupChatLoadError = "그룹 채팅방을 불러오지 못했습니다.";
+let FriendListLoadError = "친구 목록을 불러오지 못했습니다.";
+let FriendDeleted = "친구가 삭제되었습니다.";
+let FriendNotInList = "이미 친구목록에 없습니다.";
+let FriendDeleteError = "삭제 중 오류가 발생했습니다.";
+let GroupListLoadError = "그룹 목록을 불러오지 못했습니다.";
+let GroupLeft = "그룹에서 나갔습니다.";
+let GroupNotFound = "그룹을 찾을 수 없습니다.";
+let GroupLeaveError = "그룹 나가기 중 오류가 발생했습니다.";
+let UnknownError = "알 수 없는 오류가 발생했습니다.";
+let GroupJoined = "그룹챗에 참여했습니다.";
+let GroupJoinError = "오류가 발생하여 그룹챗에 참여하지 못했습니다.";
+let FeatureNotReady = "해당 기능은 아직 완성되지 않았습니다.";
+let CheckNotPrank = "장난글이 아니라는 체크를 해주세요!";
+let FillEmailContent = "이메일과 내용을 모두 입력해주세요.";
+let ContactSuccess = "문의가 성공적으로 접수되었습니다! ✉️";
+let ContactFailed = "문의 전송에 실패했습니다. 다시 시도해주세요. ⚠️";
+
+// 번역 관련 메시지 변수들
+let Translating = "번역본을 불러오고 있습니다...";
+let Retranslating = "번역본을 새로 불러오고 있습니다...";
+let TranslationFailed = "번역본을 불러오지 못했습니다.";
+
 console.log("콘솔 꺼라. 뭐 입력했다가 밴먹을 수 있어");
 
 
@@ -166,12 +190,7 @@ function make_group_partner_chat(content, partner) {
  * 언어가 다를 경우를 대비해서 채팅에 띄울때 번역본도 함께 띄우도록
  * @param {string} content
  */
-function make_partner_chat_otherlang(content, partner_lang, partner) {
-    // 이름 먼저 추가
-    container.insertAdjacentHTML(
-        "beforeend",
-        `<p class="group_partner_name">${partner}</p>`
-    );
+function make_partner_chat_otherlang(content, partner_lang, partner, foreign_ver) {
 
     // 채팅 박스 생성
     const div = document.createElement("div");
@@ -192,19 +211,24 @@ function make_partner_chat_otherlang(content, partner_lang, partner) {
         if (!translated) {
             translated = document.createElement("p");
             translated.classList.add("translated");
-            translated.textContent = "번역본을 불러오고 있습니다...";
+            translated.textContent = Translating;
             div.appendChild(translated);
         } else {
-            translated.textContent = "번역본을 새로 불러오고 있습니다...";
+            translated.textContent = Retranslating;
         }
 
         try {
-            const result = await translate_text(partner_lang, my_lang, content);
+            let result = '';
+            if (foreign_ver) {
+                result = foreign_ver; // 이미 번역본을 제공해줬음
+            } else {
+                result = await translate_text(partner_lang, my_lang, content); // 제공이 안되어있음
+            }
             translated.textContent = result;
             btn.style.display = "none"; // 번역 끝나면 버튼 숨기기
         } catch (err) {
             console.error("번역 오류 발생:", err);
-            translated.textContent = "번역본을 불러오지 못했습니다.";
+            translated.textContent = TranslationFailed;
         }
     });
 
@@ -215,7 +239,7 @@ function make_partner_chat_otherlang(content, partner_lang, partner) {
  * 언어가 다를 경우를 대비해서 채팅에 띄울때 번역본도 함께 띄우도록
  * @param {string} content
  */
-function make_group_partner_chat_otherlang(content, partner_lang, partner) {
+function make_group_partner_chat_otherlang(content, partner_lang, partner, foreign_ver) {
     // 이름 먼저 추가
     container.insertAdjacentHTML(
         "beforeend",
@@ -240,29 +264,86 @@ function make_group_partner_chat_otherlang(content, partner_lang, partner) {
         if (!translated) {
             translated = document.createElement("p");
             translated.classList.add("translated");
-            translated.textContent = "번역본을 불러오고 있습니다...";
+            translated.textContent = Translating;
             div.appendChild(translated);
         } else {
-            translated.textContent = "번역본을 새로 불러오고 있습니다...";
+            translated.textContent = Retranslating;
         }
 
         try {
-            const result = await translate_text(partner_lang, my_lang, content);
+            let result = '';
+            if (foreign_ver) {
+                result = foreign_ver; // 이미 번역본을 제공해줬음
+            } else {
+                result = await translate_text(partner_lang, my_lang, content); // 제공이 안되어있음
+            }
             translated.textContent = result;
             btn.style.display = "none"; // 번역 끝나면 버튼 숨기기
         } catch (err) {
             console.error("번역 오류 발생:", err);
-            translated.textContent = "번역본을 불러오지 못했습니다.";
+            translated.textContent = TranslationFailed;
         }
     });
 
     container.appendChild(div);
 }
 
+async function waitForConfirm() {
+    const popup = document.querySelector(".previewtranslate");
+    const confirmBtn = document.getElementById("confirm_translate");
+    const reloadBtn = document.getElementById("reload_translate");
+    const result_translation = document.querySelector('#translation_result');
+  
+    async function doTranslate() {
+      const translated = await translate_text(my_lang, partner_lang, textbox.value);
+      if ('value' in result_translation) {
+        result_translation.value = translated;
+      } else {
+        result_translation.textContent = translated;
+      }
+    }
+  
+    await doTranslate(); // 첫 번역 실행
+    popup.style.display = "block";
+  
+    return new Promise((resolve) => {
+      async function handleConfirm() {
+        popup.style.display = "none";
+        cleanup();
+        resolve();
+      }
+  
+      async function handleReload() {
+        await doTranslate(); // 번역 다시 실행
+      }
+  
+      function cleanup() {
+        confirmBtn.removeEventListener("click", handleConfirm);
+        reloadBtn.removeEventListener("click", handleReload);
+      }
+  
+      confirmBtn.addEventListener("click", handleConfirm);
+      reloadBtn.addEventListener("click", handleReload);
+    });
+  }
+  
+  
+
 send_btn.addEventListener("click", async () => {
     let param = {};
+    let foreign_ver = '';
     if (textbox.value) {
-        make_my_chat(textbox.value);
+        if (my_lang !== partner_lang) {
+            if (my_TP) {
+                await waitForConfirm();
+            } else {
+                await translate_text(my_lang, partner_lang, textbox.value);
+            }
+            foreign_ver = document.querySelector('#translation_result').value;
+            make_my_chat(textbox.value);
+        } else {
+            make_my_chat(textbox.value);
+        }
     }
     if (chat_method === 1) {
         param = {
@@ -270,14 +351,16 @@ send_btn.addEventListener("click", async () => {
             to: now_group,
             content: textbox.value,
             mehtod: 1,
-            my_lang: my_lang
+            my_lang: my_lang,
+            foreign_ver: foreign_ver
         };
     } else {
         param = {
             from: my_id,
             to: partner_id,
             content: textbox.value,
-            method: 0
+            method: 0,
+            foreign_ver: foreign_ver
         };
     }
     socket.emit("chatting", param);
@@ -400,7 +483,7 @@ async function enter_groupchat_room(groupId) {
     // ✅ 그룹 채팅 정보 요청
     const data = await get_groupchat_history(groupId);
     if (data.message !== "2") {
-        alert("그룹 채팅방을 불러오지 못했습니다.");
+        alert(GroupChatLoadError);
         return;
     }
 
@@ -503,16 +586,32 @@ async function display_developervoice() {
         // div 생성
         const articleDiv = document.createElement("div");
         articleDiv.className = article.important ? "importantArticle" : "Article";
+        articleDiv.style.display = "flex";
 
         // 아이콘
         const img = document.createElement("img");
         img.src = "../svgs/bell.svg";
         img.className = article.important ? "bell-icon" : "bell-icon-default";
 
+        // 내용을 담을 div 생성
+        const contentDiv = document.createElement("div");
+        contentDiv.style.display = "block";
+
         // 타이틀
         const strong = document.createElement("strong");
         strong.textContent = article.title;
         strong.dataset.contentid = article.id;
+        
+        // 사용자 언어가 한국어가 아닌 경우 제목 번역
+        if (my_lang !== "kr") {
+            try {
+                const translatedTitle = await translate_text("kr", my_lang, article.title);
+                strong.textContent = translatedTitle;
+            } catch (error) {
+                console.error("제목 번역 오류:", error);
+                // 번역 실패 시 원본 제목 유지
+            }
+        }
 
         // 날짜
         const p = document.createElement("p");
@@ -528,11 +627,20 @@ async function display_developervoice() {
             display_developervoice_content(article.id);
         });
 
-        // 조립
+        // 내용 div에 제목과 날짜 추가
+        contentDiv.appendChild(strong);
+        contentDiv.appendChild(p);
+
+        // 메인 div에 아이콘과 내용 div 추가
         articleDiv.appendChild(img);
-        articleDiv.appendChild(strong);
-        articleDiv.appendChild(p);
+        articleDiv.appendChild(contentDiv);
+        
+        // 컨테이너에 추가
         container.appendChild(articleDiv);
+        
+        // 각 항목 사이에 br 추가
+        const br = document.createElement("br");
+        container.appendChild(br);
     }
 }
 
@@ -558,12 +666,29 @@ async function display_developervoice_content(id) {
     const titleEl = acontainer.querySelector("strong");
     const contentEl = acontainer.querySelector("p");
     
+    // 사용자 언어가 한국어가 아닌 경우 내용 번역
+    let displayTitle = article.title;
+    let displayContent = article.content;
+    
+    if (my_lang !== "kr") {
+        try {
+            // 제목과 내용을 번역
+            const translatedTitle = await translate_text("kr", my_lang, article.title);
+            const translatedContent = await translate_text("kr", my_lang, article.content);
+            displayTitle = translatedTitle;
+            displayContent = translatedContent;
+        } catch (error) {
+            console.error("개발자의 소리 번역 오류:", error);
+            // 번역 실패 시 원본 내용 유지
+        }
+    }
+    
     // 줄바꿈 처리
-    const converted = article.content
+    const converted = displayContent
         .replace(/\r\n|\n|\r/g, "<br>")
         .replace(/\\n/g, "<br>");
     
-    titleEl.textContent = article.title;
+    titleEl.textContent = displayTitle;
     contentEl.innerHTML = converted;
     
 
@@ -587,7 +712,7 @@ async function display_friendlist() {
 
     const data = await get_friends(my_id);
     if (data.message !== "2") {
-        alert("친구 목록을 불러오지 못했습니다.");
+        alert(FriendListLoadError);
         return;
     }
 
@@ -629,7 +754,12 @@ async function display_friendlist() {
     // ✅ 채팅방 입장 이벤트
     document.querySelectorAll(".user-info").forEach((ele) => {
         ele.addEventListener("click", () => {
-            enter_chat_room(ele.closest(".user-table").dataset.id);
+            const parent = ele.closest(".user-table");
+            if (parent?.dataset?.id) {
+                enter_chat_room(parent.dataset.id);
+            } else {
+                console.warn("user-table not found for", ele);
+            }
         });
     });
 
@@ -641,12 +771,12 @@ async function display_friendlist() {
             if (confirm(`${friendId}님을 친구목록에서 삭제할까요?`)) {
                 remove_friend(my_id, friendId).then((data) => {
                     if (data.message === "2") {
-                        alert("친구가 삭제되었습니다.");
+                        alert(FriendDeleted);
                         display_friendlist(); // 새로고침
                     } else if (data.message === "-2") {
-                        alert("이미 친구목록에 없습니다.");
+                        alert(FriendNotInList);
                     } else {
-                        alert("삭제 중 오류가 발생했습니다.");
+                        alert(FriendDeleteError);
                     }
                 });
             }
@@ -687,19 +817,41 @@ async function display_friendlist() {
             }
         });
     });
-    friends_list.insertAdjacentHTML(
-        "beforebegin",
-        `
-        <div class="user-table EnterAIChat" data-id="NovaAI">
-            <img src="../imgs/default_pfp.png" class="user-icon">
-            <div class="user-info">
-                <strong class="user-name">Nova AI</strong>
-                <p class="user-description">새로운 AI 친구, Nova를 만나보세요.</p>
-            </div>
-        </div>
-    `,
-    );
-    // ✅ 채팅방 입장 이벤트
+    
+    // Nova AI 프로필이 이미 있는지 확인 후 추가
+    const existingNovaAI = document.querySelector(".EnterAIChat");
+    if (!existingNovaAI) {
+        if (my_lang == "en") {
+            friends_list.insertAdjacentHTML(
+                "beforebegin",
+                `
+                <div class="user-table EnterAIChat" data-id="NovaAI">
+                    <img src="../imgs/default_pfp.png" class="user-icon">
+                    <div class="user-info">
+                        <strong class="user-name">Nova AI</strong>
+                        <p class="user-description">Meet your AI friend, Nova.</p>
+                    </div>
+                </div>
+            `,
+            );
+        } else {
+            friends_list.insertAdjacentHTML(
+                "beforebegin",
+                `
+                <div class="user-table EnterAIChat" data-id="NovaAI">
+                    <img src="../imgs/default_pfp.png" class="user-icon">
+                    <div class="user-info">
+                        <strong class="user-name">Nova AI</strong>
+                        <p class="user-description">새로운 AI 친구, Nova를 만나보세요.</p>
+                    </div>
+                </div>
+            `,
+            );
+        }
+
+    }
+    
+    // ✅ 채팅방 입장 이벤트 (Nova AI 포함)
     document.querySelectorAll(".EnterAIChat").forEach((ele) => {
         ele.addEventListener("click", () => {
             enter_ai_chat_room();
@@ -714,9 +866,25 @@ async function display_friendlist() {
     const titleEl = container.querySelector("strong");
     const contentEl = container.querySelector("p");
 
-    titleEl.textContent = Aritcledata.title;
+    // 사용자 언어가 한국어가 아닌 경우 중요 공지사항 번역
+    let displayTitle = Aritcledata.title;
+    let displayContent = Aritcledata.contentPreview;
+    
+    if (my_lang !== "kr") {
+        try {
+            const translatedTitle = await translate_text("kr", my_lang, Aritcledata.title);
+            const translatedContent = await translate_text("kr", my_lang, Aritcledata.contentPreview);
+            displayTitle = translatedTitle;
+            displayContent = translatedContent;
+        } catch (error) {
+            console.error("중요 공지사항 번역 오류:", error);
+            // 번역 실패 시 원본 내용 유지
+        }
+    }
+
+    titleEl.textContent = displayTitle;
     titleEl.dataset.contentid = Aritcledata.id;
-    contentEl.textContent = Aritcledata.contentPreview;
+    contentEl.textContent = displayContent;
 
     document.querySelector('.importantArticle').addEventListener('click', async ()=>{
         display_developervoice_content(titleEl.dataset.contentid);
@@ -821,7 +989,7 @@ async function display_grouplist() {
 
     const data = await get_groups(my_id);
     if (data.message !== "2") {
-        alert("그룹 목록을 불러오지 못했습니다.");
+        alert(GroupListLoadError);
         return;
     }
 
@@ -862,12 +1030,12 @@ async function display_grouplist() {
             if (confirm("이 그룹에서 나가시겠습니까?")) {
                 leave_groupchat(groupId, my_id).then((data) => {
                     if (data.message === "1") {
-                        alert("그룹에서 나갔습니다.");
+                        alert(GroupLeft);
                         display_grouplist(); // 새로고침
                     } else if (data.message === "-1") {
-                        alert("그룹을 찾을 수 없습니다.");
+                        alert(GroupNotFound);
                     } else {
-                        alert("그룹 나가기 중 오류가 발생했습니다.");
+                        alert(GroupLeaveError);
                     }
                 });
             }
@@ -892,7 +1060,7 @@ socket.on("chatting", (data) => {
                 make_partner_image(base64); // 이 함수는 <img> 태그 만들어서 화면에 추가하는 거임
             } else {
                 if (my_lang !== partner_lang) {
-                    make_partner_chat_otherlang(data.content, partner_lang);
+                    make_partner_chat_otherlang(data.content, partner_lang, data.foreign_ver);
                 } else {
                     make_partner_chat(data.content);
                 }
@@ -904,11 +1072,33 @@ socket.on("chatting", (data) => {
                 make_partner_image(base64); // 이 함수는 <img> 태그 만들어서 화면에 추가하는 거임
             } else {
                 if (my_lang !== data.my_lang) {
-                    make_group_partner_chat_otherlang(data.content, partner_lang, data.from);
+                    make_group_partner_chat_otherlang(data.content, partner_lang, data.from, data.foreign_ver);
                 } else {
                     make_group_partner_chat(data.content,data.from);
                 }
             }
+        } else if (data.to === my_id) {
+            Notification.requestPermission().then((perm) => {
+                if (perm === "granted") {
+                  // 2. 알림 띄우기
+                  let content = '';
+                  if (isImageContent(data.content)) {
+                    content = "이미지";
+                  } else {
+                    content = data.content;
+                  }
+                  const noti = new Notification(data.from, {
+                    body: content,
+                    icon: "../imgs/default_pfp.png"
+                  });
+
+                  noti.onclick = ()=>{
+                    window.focus();
+                    enter_chat_room(data.from);
+                    noti.close();
+                  }
+                }
+            });
         }
     }
 });
@@ -928,6 +1118,21 @@ let input_add_friend = document.querySelector("#input-add-friend");
 let input_add_friend_btn = document.querySelector("#input-add-friend-btn");
 let my_desc = "";
 let my_lang = "kr"; // default value
+
+// 언어 선택 이벤트 리스너
+document.addEventListener("DOMContentLoaded", () => {
+    const languageSelect = document.querySelector("#language-select");
+    if (languageSelect) {
+        languageSelect.addEventListener("change", (e) => {
+            const selectedLang = e.target.value;
+            if (selectedLang === "en") {
+                changeui_en();
+            } else if (selectedLang === "kr") {
+                changeui_ko();
+            }
+        });
+    }
+});
 
 function display_ban(reason) {
     mainmenu_div.style.display = "none";
@@ -950,78 +1155,633 @@ function changeui_en() {
     CheckTranslate = "View Translation";
     GroupChatOK = "Request sent to admin. You'll join once approved.";
     GroupChatOK2 = "Group chat created successfully!";
-
-    // [1] 제목들
-    document.querySelectorAll("#app-title").forEach((el) => {
-        if (el.textContent === "로그인") el.textContent = "Login";
-        if (el.textContent === "서비스 이용 불가 안내")
-            el.textContent = "Service Access Restricted";
-        if (el.textContent === "그룹챗 만들기")
-            el.textContent = "Create Group Chat";
-        if (el.textContent === "MN Chat") el.textContent = "MN Chat";
-    });
-
-    // [2] 로그인 페이지
-    const loginWelcome = document.querySelector(".login strong");
-    if (loginWelcome) loginWelcome.textContent = "Welcome to the Chat App.";
-
-    document.querySelector("#input-id").placeholder = "Enter your ID";
-    document.querySelector("#input-pw").placeholder = "Enter your password";
-    document.querySelector("#input-login").textContent = "Login";
-    document.querySelector(".login-form p").textContent = "Don't have an account?";
-    document.querySelector("#input-register").textContent = "Sign Up";
-
-    // [3] 밴 화면
-    document.querySelector(".banned-div strong").textContent = "You are banned.";
-    document.querySelector(".banned-div p").textContent =
-        "According to the Information and Communications Network Act, you have been banned for inappropriate language or fraudulent activity.";
-    document.querySelector("#ban_reason").textContent = "Loading...";
-
-    // [4] 메인 메뉴
-    const mainLabels = document.querySelectorAll(".main-menu strong");
-    if (mainLabels.length > 0) {
-        mainLabels[0].textContent = "My Profile";
-        mainLabels[1].textContent = "Friends";
-        mainLabels[2].textContent = "Group Chats";
-        mainLabels[3].textContent = "Add Friend";
-        mainLabels[4].textContent = "Add Group Chat";
+    
+    // 추가 alert 메시지 영어 번역
+    GroupChatLoadError = "Failed to load group chat room.";
+    FriendListLoadError = "Failed to load friend list.";
+    FriendDeleted = "Friend has been deleted.";
+    FriendNotInList = "Friend is not in the list.";
+    FriendDeleteError = "An error occurred while deleting.";
+    GroupListLoadError = "Failed to load group list.";
+    GroupLeft = "You have left the group.";
+    GroupNotFound = "Group not found.";
+    GroupLeaveError = "An error occurred while leaving the group.";
+    UnknownError = "An unknown error occurred.";
+    GroupJoined = "You have joined the group chat.";
+    GroupJoinError = "An error occurred while joining the group chat.";
+    FeatureNotReady = "This feature is not yet complete.";
+    CheckNotPrank = "Please check that this is not a prank message!";
+    FillEmailContent = "Please enter both email and content.";
+    ContactSuccess = "Your inquiry has been successfully submitted! ✉️";
+    ContactFailed = "Failed to send inquiry. Please try again. ⚠️";
+    
+    // 번역 관련 메시지 영어 번역
+    Translating = "Loading translation...";
+    Retranslating = "Reloading translation...";
+    TranslationFailed = "Failed to load translation.";
+    
+    // 번역 지연 안내 메시지 영어로 변경
+    const translationInfo = document.querySelector("#information");
+    if (translationInfo) {
+        translationInfo.textContent = "If you are using a language other than Korean, posts may appear with a slight delay due to translation.";
     }
+  
+    // [1] 로그인 페이지
+    document.querySelectorAll("#app-title").forEach((el) => {
+      if (el.textContent === "로그인") el.textContent = "Login";
+      if (el.textContent === "서비스 이용 불가 안내")
+        el.textContent = "Service Access Restricted";
+      if (el.textContent === "그룹챗 만들기")
+        el.textContent = "Create Group Chat";
+      if (el.textContent === "MN Chat") el.textContent = "MN Chat";
+      if (el.textContent === "유저의 소리📢") el.textContent = "User Feedback 📢";
+      if (el.textContent === "개발자의 소리📢") el.textContent = "Developer Notes 📢";
+      if (el.textContent === "Nova AI") el.textContent = "Nova AI";
+    });
+  
+    const login = document.querySelector(".login");
+    if (login) {
+      const strong = login.querySelector("strong");
+      if (strong) strong.textContent = "Welcome to the MN Chat!";
+      document.querySelector("#input-id").placeholder = "Enter your ID";
+      document.querySelector("#input-pw").placeholder = "Enter your password";
+      document.querySelector("#input-login").textContent = "Login";
+      const p = login.querySelector(".login-form p");
+      if (p) p.textContent = "Don't have an account?";
+      document.querySelector("#input-register").textContent = "Sign Up";
+    }
+  
+    // [2] 밴 화면
+    const banned = document.querySelector(".banned-div");
+    if (banned) {
+      banned.querySelector("strong").textContent = "You are banned.";
+      banned.querySelector("p").innerHTML =
+        "<strong>Information and Communications Network Act</strong> violation: you have been banned for inappropriate language or fraudulent activity.";
+      document.querySelector("#ban_reason").textContent = "Loading...";
+    }
+  
+    // [3] 메인 메뉴
+    const main = document.querySelector(".main-menu");
+    if (main) {
+      main.querySelector(".importantArticle strong").textContent = "Loading...";
+      main.querySelector(".importantArticle p").textContent = "Loading...";
+  
+      const mainStrong = main.querySelectorAll("strong");
+      if (mainStrong.length > 0) {
+        mainStrong.forEach((s) => {
+          if (s.textContent === "내 프로필") s.textContent = "My Profile";
+          if (s.textContent === "친구") s.textContent = "Friends";
+          if (s.textContent === "그룹챗") s.textContent = "Group Chats";
+          if (s.textContent === "친구 추가") s.textContent = "Add Friend";
+          if (s.textContent === "그룹챗 추가") s.textContent = "Add Group Chat";
+          if (s.textContent === "문의사항") s.textContent = "Contact Us";
+        });
+      }
+  
+      document.querySelector("#input-add-friend").placeholder = "Enter friend ID";
+      document.querySelector("#input-add-friend-btn").textContent = "Add Friend";
+      document.querySelector("#input-add-group").placeholder = "Enter group chat ID";
+      document.querySelector("#input-add-group-btn").textContent = "Add Group Chat";
+      document.querySelector("#make_group_chat").textContent = "Create Group Chat";
+  
+      // 문의사항 메뉴
+      document.querySelectorAll(".menu_name").forEach((el) => {
+        if (el.textContent.includes("유저의 소리")) el.textContent = "User Feedback 📢";
+        if (el.textContent.includes("개발자의 소리")) el.textContent = "Developer Notes 📢";
+      });
+      document.querySelectorAll(".menu_desc").forEach((el) => {
+        if (el.dataset.menu === "user_voice") el.textContent = "Tell us your opinion!";
+        if (el.dataset.menu === "developer_voice") el.textContent = "Developer updates & news";
+      });
+    }
+  
+    // [4] 프로필 수정
+    const profileEdit = document.querySelector(".profile-edit");
+    if (profileEdit) {
+    profileEdit.querySelector("strong").textContent = "Edit Profile";
 
-    document.querySelector("#input-add-friend").placeholder = "Enter friend ID";
-    document.querySelector("#input-add-friend-btn").textContent = "Add Friend";
-    document.querySelector("#input-add-group").placeholder = "Enter group chat ID";
-    document.querySelector("#input-add-group-btn").textContent = "Add Group Chat";
-    document.querySelector("#make_group_chat").textContent = "Create Group Chat";
-
-    // [5] 프로필 수정 화면
-    document.querySelector(".profile-edit strong").textContent = "Edit Profile";
-    const profileStrong = document.querySelectorAll(".profile-edit .user-info strong");
+    const profileStrong = profileEdit.querySelectorAll(".user-info strong");
     if (profileStrong.length >= 2) {
         profileStrong[0].textContent = "Edit Status Message";
         profileStrong[1].textContent = "Change Language";
     }
 
-    document.querySelector("#edit_profile_message").placeholder = "Enter your status message here";
+    document.querySelector("#edit_profile_message").placeholder = "Enter your status message";
 
     const countrySelect = document.querySelector("#countrys");
-    countrySelect.querySelector('option[value="kr"]').textContent = "Korean";
-    countrySelect.querySelector('option[value="en"]').textContent = "English";
+    if (countrySelect) {
+        countrySelect.querySelector('option[value="kr"]').textContent = "Korean";
+        countrySelect.querySelector('option[value="en"]').textContent = "English";
+    }
 
     document.querySelector("#apply_profile_edit").textContent = "Apply";
 
-    // [6] 그룹챗 만들기
-    document.querySelector(".make_group_chat strong").textContent = "Create Group Chat";
-    document.querySelector("#input-make-group-chat").placeholder = "Enter group chat name";
-    document.querySelector("#apply_make_group_chat").textContent = "Create";
+    // ✅ 체크박스 라벨 2개 모두 영어화
+    const labels = profileEdit.querySelectorAll("label");
+    labels.forEach((label) => {
+        const input = label.querySelector("input");
+        if (input) {
+        if (input.id === "light-mode-toggle") {
+            label.innerHTML = `<input type="checkbox" id="light-mode-toggle"> Light Mode`;
+        }
+        if (input.id === "translate-preview-toggle") {
+            label.innerHTML = `<input type="checkbox" id="translate-preview-toggle"> Translation Preview`;
+        }
+        }
+    });
+    }
 
-    // [7] 채팅창
-    const partnerId = document.querySelector("#partner-id");
-    if (partnerId && partnerId.textContent.includes("로딩중"))
-        partnerId.textContent = "Loading...";
+  
+    // [5] 그룹챗 만들기
+    const makeGroup = document.querySelector(".make_group_chat");
+    if (makeGroup) {
+      makeGroup.querySelector("strong").textContent = "Create Group Chat";
+      document.querySelector("#input-make-group-chat").placeholder = "Enter group chat name";
+      document.querySelector("#apply_make_group_chat").textContent = "Create";
+    }
+  
+    // [6] 채팅창 (일반)
+    const chat = document.querySelector(".chatting");
+    if (chat) {
+      const partner = chat.querySelector("#partner-id");
+      if (partner && partner.textContent.includes("로딩중"))
+        partner.textContent = "Loading...";
+      const textbox = chat.querySelector("#textbox");
+      if (textbox) textbox.placeholder = "Type your message here.";
+    }
+  
+    // [7] 번역 팝업
+    const popup = document.querySelector(".previewtranslate");
+    if (popup) {
+      popup.querySelector("strong").textContent = "Translation Preview";
+      popup.querySelector("p").innerHTML = "Please review the translation below. If it looks good, press <b>Confirm</b>.";
+      popup.querySelector("#confirm_translate").textContent = "Confirm";
+      popup.querySelector("#reload_translate").textContent = "Regenerate";
+    }
+  
+    // [8] Nova AI
+    const AItextbox = document.querySelector("#AItextbox");
+    if (AItextbox) AItextbox.placeholder = "Type your message here.";
+    const AIsend = document.querySelector("#AIsend_btn img");
+    if (AIsend) AIsend.alt = "Send";
+  
+    // [9] 유저의 소리
+    const userVoice = document.querySelector(".user_voice");
+    if (userVoice) {
+      userVoice.querySelector("strong").textContent = "Contact Us";
+      userVoice.querySelector("p").textContent = "Contribute to MN Chat’s improvement!";
+      userVoice.querySelector(".contact_textarea").placeholder = "Please write your feedback here :D";
+      userVoice.querySelector(".contact_input").placeholder = "Enter your email address";
+      userVoice.querySelector(".contact_label").textContent = "This is not a prank message.";
+      userVoice.querySelector(".submit_contact").textContent = "Submit";
+    }
+  
+    // [10] 개발자의 소리 목록
+    const devVoice = document.querySelector(".developVoice");
+    if (devVoice) {
+      devVoice.querySelector("strong").textContent = "Patch Notes & Announcements!";
+    }
+  
+    // [11] 개발자의 소리 - 상세
+    const devContent = document.querySelector(".developVoiceContent");
+    if (devContent) {
+      devContent.querySelector(".voice-title").textContent = "Title Loading...";
+      devContent.querySelector(".voice-text").textContent = "Content Loading...";
+    }
+    
+    // [12] 누락된 텍스트들 추가
+    // Nova AI 설명 텍스트
+    const novaDesc = document.querySelector(".user-description");
+    if (novaDesc && novaDesc.textContent.includes("새로운 AI 친구")) {
+        novaDesc.textContent = "Meet Nova, your new AI friend.";
+    }
+    
+    // HTML 하드코딩된 "로딩중" 텍스트들
+    document.querySelectorAll("*").forEach((el) => {
+        if (el.textContent === "로딩중 입니다...") {
+            el.textContent = "Loading...";
+        }
+        if (el.textContent === "로딩중입니다...") {
+            el.textContent = "Loading...";
+        }
+    });
+    
+    // 그룹챗 관련 텍스트
+    const groupName = document.querySelector(".group_name");
+    if (groupName && groupName.textContent === "테스트입니다.") {
+        groupName.textContent = "Test Group";
+    }
+    
+    // 메뉴 설명 텍스트들
+    document.querySelectorAll(".menu_desc").forEach((el) => {
+        if (el.textContent === "개발자야 이것좀 고쳐봐!") {
+            el.textContent = "Tell us your opinion!";
+        }
+        if (el.textContent === "개발자야 너 뭐하냐") {
+            el.textContent = "Developer updates & news";
+        }
+    });
+    
+    // 언어 옵션 텍스트
+    const krOption = document.querySelector('option[value="kr"]');
+    if (krOption && krOption.textContent === "한국어") {
+        krOption.textContent = "Korean";
+    }
+    
+    // 체크박스 라벨들
+    document.querySelectorAll("label").forEach((label) => {
+        if (label.textContent === "라이트모드") {
+            label.innerHTML = `<input type="checkbox" id="light-mode-toggle"> Light Mode`;
+        }
+        if (label.textContent === "번역 미리보기") {
+            label.innerHTML = `<input type="checkbox" id="translate-preview-toggle"> Translation Preview`;
+        }
+        if (label.textContent === "장난글이 아닙니다.") {
+            label.textContent = "This is not a prank message.";
+        }
+    });
+    
+    // 버튼 텍스트들
+    const applyBtn = document.querySelector("#apply_profile_edit");
+    if (applyBtn && applyBtn.textContent === "적용") {
+        applyBtn.textContent = "Apply";
+    }
+    
+    const submitBtn = document.querySelector(".submit_contact");
+    if (submitBtn && submitBtn.textContent === "완료") {
+        submitBtn.textContent = "Submit";
+    }
+    
+    // 입력 필드 placeholder들
+    const contactTextarea = document.querySelector(".contact_textarea");
+    if (contactTextarea && contactTextarea.placeholder.includes("여기에 입력해주세요")) {
+        contactTextarea.placeholder = "Please write your feedback here :D";
+    }
+    
+    const contactInput = document.querySelector(".contact_input");
+    if (contactInput && contactInput.placeholder.includes("여기에 입력해주세요")) {
+        contactInput.placeholder = "Enter your email address";
+    }
+    
+    const textbox = document.querySelector("#textbox");
+    if (textbox && textbox.placeholder.includes("여기에 메시지를 입력하세요")) {
+        textbox.placeholder = "Type your message here.";
+    }
+    
+    const AItextbox2 = document.querySelector("#AItextbox");
+    if (AItextbox2 && AItextbox2.placeholder.includes("여기에 메시지를 입력하세요")) {
+        AItextbox2.placeholder = "Type your message here.";
+    }
+    
+    const profileMessage = document.querySelector("#edit_profile_message");
+    if (profileMessage && profileMessage.placeholder.includes("여기에 상태메시지 입력")) {
+        profileMessage.placeholder = "Enter your status message";
+    }
+    
+    const groupChatInput = document.querySelector("#input-make-group-chat");
+    if (groupChatInput && groupChatInput.placeholder.includes("그룹챗 이름 입력")) {
+        groupChatInput.placeholder = "Enter group chat name";
+    }
+    
+    const friendInput = document.querySelector("#input-add-friend");
+    if (friendInput && friendInput.placeholder.includes("친구 아이디 입력")) {
+        friendInput.placeholder = "Enter friend ID";
+    }
+    
+    const groupInput = document.querySelector("#input-add-group");
+    if (groupInput && groupInput.placeholder.includes("그룹챗 아이디 입력")) {
+        groupInput.placeholder = "Enter group chat ID";
+    }
+    
+    // alt 텍스트들
+    const imageAlt = document.querySelector('img[alt="이미지보내기"]');
+    if (imageAlt) imageAlt.alt = "Send Image";
+    
+    const sendAlt = document.querySelectorAll('img[alt="보내기"]');
+    sendAlt.forEach((img) => {
+        img.alt = "Send";
+    });
+  }
 
-    document.querySelector("#textbox").placeholder = "Type your message here.";
+/**
+ * UI를 한국어로 바꾸는 함수!!
+ */
+function changeui_ko() {
+    // 시스템 메시지
+    IDPWnotcorrect = "아이디 혹은 비밀번호가 일치하지 않습니다.";
+    SIGNUPok = "회원가입 성공! 다시 로그인 해주세요.";
+    FRIENDok1 = "친구 추가 성공!";
+    FRIENDok2 = "상대도 당신에게 친구추가를 하면 친구가 됩니다.";
+    PfOk = "프로필 수정이 완료되었습니다.";
+    RefreshToApply = "변경하기 위해 다시 로그인 해주십시오.";
+    CheckTranslate = "번역본 보기";
+    GroupChatOK = "관리자에게 요청이 전송되었습니다. 허용 시 참여됩니다.";
+    GroupChatOK2 = "그룹챗 만들기 성공!";
+    
+    // 추가 alert 메시지 한국어로 복원
+    GroupChatLoadError = "그룹 채팅방을 불러오지 못했습니다.";
+    FriendListLoadError = "친구 목록을 불러오지 못했습니다.";
+    FriendDeleted = "친구가 삭제되었습니다.";
+    FriendNotInList = "이미 친구목록에 없습니다.";
+    FriendDeleteError = "삭제 중 오류가 발생했습니다.";
+    GroupListLoadError = "그룹 목록을 불러오지 못했습니다.";
+    GroupLeft = "그룹에서 나갔습니다.";
+    GroupNotFound = "그룹을 찾을 수 없습니다.";
+    GroupLeaveError = "그룹 나가기 중 오류가 발생했습니다.";
+    UnknownError = "알 수 없는 오류가 발생했습니다.";
+    GroupJoined = "그룹챗에 참여했습니다.";
+    GroupJoinError = "오류가 발생하여 그룹챗에 참여하지 못했습니다.";
+    FeatureNotReady = "해당 기능은 아직 완성되지 않았습니다.";
+    CheckNotPrank = "장난글이 아니라는 체크를 해주세요!";
+    FillEmailContent = "이메일과 내용을 모두 입력해주세요.";
+    ContactSuccess = "문의가 성공적으로 접수되었습니다! ✉️";
+    ContactFailed = "문의 전송에 실패했습니다. 다시 시도해주세요. ⚠️";
+    
+    // 번역 관련 메시지 한국어로 복원
+    Translating = "번역본을 불러오고 있습니다...";
+    Retranslating = "번역본을 새로 불러오고 있습니다...";
+    TranslationFailed = "번역본을 불러오지 못했습니다.";
+    
+    // 번역 지연 안내 메시지 한국어로 변경
+    const translationInfo = document.querySelector("#information");
+    if (translationInfo) {
+        translationInfo.textContent = "한국어가 아닌 언어를 사용하는 경우 번역으로 인해 게시물이 약간 지연될 수 있습니다.";
+    }
+  
+    // [1] 로그인 페이지
+    document.querySelectorAll("#app-title").forEach((el) => {
+      if (el.textContent === "Login") el.textContent = "로그인";
+      if (el.textContent === "Service Access Restricted")
+        el.textContent = "서비스 이용 불가 안내";
+      if (el.textContent === "Create Group Chat")
+        el.textContent = "그룹챗 만들기";
+      if (el.textContent === "MN Chat") el.textContent = "MN Chat";
+      if (el.textContent === "User Feedback 📢") el.textContent = "유저의 소리📢";
+      if (el.textContent === "Developer Notes 📢") el.textContent = "개발자의 소리📢";
+      if (el.textContent === "Nova AI") el.textContent = "Nova AI";
+    });
+  
+    const login = document.querySelector(".login");
+    if (login) {
+      const strong = login.querySelector("strong");
+      if (strong) strong.textContent = "채팅앱에 오신 것을 환영합니다.";
+      document.querySelector("#input-id").placeholder = "ID 입력";
+      document.querySelector("#input-pw").placeholder = "비밀번호 입력";
+      document.querySelector("#input-login").textContent = "로그인";
+      const p = login.querySelector(".login-form p");
+      if (p) p.textContent = "계정이 없으시다면:";
+      document.querySelector("#input-register").textContent = "회원가입";
+    }
+  
+    // [2] 밴 화면
+    const banned = document.querySelector(".banned-div");
+    if (banned) {
+      banned.querySelector("strong").textContent = "차단되었습니다.";
+      banned.querySelector("p").innerHTML =
+        "<strong>정보통신망 이용촉진 및 정보보호 등에 관한 법률</strong>에 의거, 부적절한 표현 사용 혹은 사기로 의해 차단당하셨습니다.";
+      document.querySelector("#ban_reason").textContent = "로딩중 입니다...";
+    }
+  
+    // [3] 메인 메뉴
+    const main = document.querySelector(".main-menu");
+    if (main) {
+      main.querySelector(".importantArticle strong").textContent = "로딩중 입니다...";
+      main.querySelector(".importantArticle p").textContent = "로딩중 입니다...";
+  
+      const mainStrong = main.querySelectorAll("strong");
+      if (mainStrong.length > 0) {
+        mainStrong.forEach((s) => {
+          if (s.textContent === "My Profile") s.textContent = "내 프로필";
+          if (s.textContent === "Friends") s.textContent = "친구";
+          if (s.textContent === "Group Chats") s.textContent = "그룹챗";
+          if (s.textContent === "Add Friend") s.textContent = "친구 추가";
+          if (s.textContent === "Add Group Chat") s.textContent = "그룹챗 추가";
+          if (s.textContent === "Contact Us") s.textContent = "문의사항";
+        });
+      }
+  
+      document.querySelector("#input-add-friend").placeholder = "친구 아이디 입력";
+      document.querySelector("#input-add-friend-btn").textContent = "친구 추가";
+      document.querySelector("#input-add-group").placeholder = "그룹챗 아이디 입력";
+      document.querySelector("#input-add-group-btn").textContent = "그룹챗 추가";
+      document.querySelector("#make_group_chat").textContent = "그룹챗 만들기";
+  
+      // 문의사항 메뉴
+      document.querySelectorAll(".menu_name").forEach((el) => {
+        if (el.textContent.includes("User Feedback")) el.textContent = "유저의 소리📢";
+        if (el.textContent.includes("Developer Notes")) el.textContent = "개발자의 소리📢";
+      });
+      document.querySelectorAll(".menu_desc").forEach((el) => {
+        if (el.dataset.menu === "user_voice") el.textContent = "개발자야 이것좀 고쳐봐!";
+        if (el.dataset.menu === "developer_voice") el.textContent = "개발자야 너 뭐하냐";
+      });
+    }
+  
+    // [4] 프로필 수정
+    const profileEdit = document.querySelector(".profile-edit");
+    if (profileEdit) {
+    profileEdit.querySelector("strong").textContent = "프로필 수정";
 
-}
+    const profileStrong = profileEdit.querySelectorAll(".user-info strong");
+    if (profileStrong.length >= 2) {
+        profileStrong[0].textContent = "상태메시지 수정";
+        profileStrong[1].textContent = "언어 수정";
+    }
+
+    document.querySelector("#edit_profile_message").placeholder = "여기에 상태메시지 입력";
+
+    const countrySelect = document.querySelector("#countrys");
+    if (countrySelect) {
+        countrySelect.querySelector('option[value="kr"]').textContent = "한국어";
+        countrySelect.querySelector('option[value="en"]').textContent = "English";
+    }
+
+    document.querySelector("#apply_profile_edit").textContent = "적용";
+
+    // ✅ 체크박스 라벨 2개 모두 한국어화
+    const labels = profileEdit.querySelectorAll("label");
+    labels.forEach((label) => {
+        const input = label.querySelector("input");
+        if (input) {
+        if (input.id === "light-mode-toggle") {
+            label.innerHTML = `<input type="checkbox" id="light-mode-toggle"> 라이트모드`;
+        }
+        if (input.id === "translate-preview-toggle") {
+            label.innerHTML = `<input type="checkbox" id="translate-preview-toggle"> 번역 미리보기`;
+        }
+        }
+    });
+    }
+
+  
+    // [5] 그룹챗 만들기
+    const makeGroup = document.querySelector(".make_group_chat");
+    if (makeGroup) {
+      makeGroup.querySelector("strong").textContent = "그룹챗 만들기";
+      document.querySelector("#input-make-group-chat").placeholder = "그룹챗 이름 입력";
+      document.querySelector("#apply_make_group_chat").textContent = "그룹챗 만들기";
+    }
+  
+    // [6] 채팅창 (일반)
+    const chat = document.querySelector(".chatting");
+    if (chat) {
+      const partner = chat.querySelector("#partner-id");
+      if (partner && partner.textContent.includes("Loading"))
+        partner.textContent = "로딩중입니다...";
+      const textbox = chat.querySelector("#textbox");
+      if (textbox) textbox.placeholder = "여기에 메시지를 입력하세요.";
+    }
+  
+    // [7] 번역 팝업
+    const popup = document.querySelector(".previewtranslate");
+    if (popup) {
+      popup.querySelector("strong").textContent = "번역 미리보기";
+      popup.querySelector("p").innerHTML = "AI는 실수할 수 있습니다. AI번역 결과를 보시고, 다시 생성할지 결정해주십시오.";
+      popup.querySelector("#confirm_translate").textContent = "확인";
+      popup.querySelector("#reload_translate").textContent = "재생성";
+    }
+  
+    // [8] Nova AI
+    const AItextbox = document.querySelector("#AItextbox");
+    if (AItextbox) AItextbox.placeholder = "여기에 메시지를 입력하세요.";
+    const AIsend = document.querySelector("#AIsend_btn img");
+    if (AIsend) AIsend.alt = "보내기";
+  
+    // [9] 유저의 소리
+    const userVoice = document.querySelector(".user_voice");
+    if (userVoice) {
+      userVoice.querySelector("strong").textContent = "문의사항";
+      userVoice.querySelector("p").textContent = "MN Chat의 발전에 기여해주세요!";
+      userVoice.querySelector(".contact_textarea").placeholder = "여기에 입력해주세요 :D";
+      userVoice.querySelector(".contact_input").placeholder = "여기에 입력해주세요 :D";
+      userVoice.querySelector(".contact_label").textContent = "장난글이 아닙니다.";
+      userVoice.querySelector(".submit_contact").textContent = "완료";
+    }
+  
+    // [10] 개발자의 소리 목록
+    const devVoice = document.querySelector(".developVoice");
+    if (devVoice) {
+      devVoice.querySelector("strong").textContent = "패치노트 및 공지사항!";
+    }
+  
+    // [11] 개발자의 소리 - 상세
+    const devContent = document.querySelector(".developVoiceContent");
+    if (devContent) {
+      devContent.querySelector(".voice-title").textContent = "타이틀 로드중";
+      devContent.querySelector(".voice-text").textContent = "내용 로드중";
+    }
+    
+    // [12] 누락된 텍스트들 한국어로 복원
+    // Nova AI 설명 텍스트
+    const novaDesc = document.querySelector(".user-description");
+    if (novaDesc && novaDesc.textContent.includes("Meet Nova")) {
+        novaDesc.textContent = "새로운 AI 친구, Nova를 만나보세요.";
+    }
+    
+    // HTML 하드코딩된 "Loading" 텍스트들
+    document.querySelectorAll("*").forEach((el) => {
+        if (el.textContent === "Loading...") {
+            el.textContent = "로딩중 입니다...";
+        }
+    });
+    
+    // 그룹챗 관련 텍스트
+    const groupName = document.querySelector(".group_name");
+    if (groupName && groupName.textContent === "Test Group") {
+        groupName.textContent = "테스트입니다.";
+    }
+    
+    // 메뉴 설명 텍스트들
+    document.querySelectorAll(".menu_desc").forEach((el) => {
+        if (el.textContent === "Tell us your opinion!") {
+            el.textContent = "개발자야 이것좀 고쳐봐!";
+        }
+        if (el.textContent === "Developer updates & news") {
+            el.textContent = "개발자야 너 뭐하냐";
+        }
+    });
+    
+    // 언어 옵션 텍스트
+    const krOption = document.querySelector('option[value="kr"]');
+    if (krOption && krOption.textContent === "Korean") {
+        krOption.textContent = "한국어";
+    }
+    
+    // 체크박스 라벨들
+    document.querySelectorAll("label").forEach((label) => {
+        if (label.textContent === "Light Mode") {
+            label.innerHTML = `<input type="checkbox" id="light-mode-toggle"> 라이트모드`;
+        }
+        if (label.textContent === "Translation Preview") {
+            label.innerHTML = `<input type="checkbox" id="translate-preview-toggle"> 번역 미리보기`;
+        }
+        if (label.textContent === "This is not a prank message.") {
+            label.textContent = "장난글이 아닙니다.";
+        }
+    });
+    
+    // 버튼 텍스트들
+    const applyBtn = document.querySelector("#apply_profile_edit");
+    if (applyBtn && applyBtn.textContent === "Apply") {
+        applyBtn.textContent = "적용";
+    }
+    
+    const submitBtn = document.querySelector(".submit_contact");
+    if (submitBtn && submitBtn.textContent === "Submit") {
+        submitBtn.textContent = "완료";
+    }
+    
+    // 입력 필드 placeholder들
+    const contactTextarea = document.querySelector(".contact_textarea");
+    if (contactTextarea && contactTextarea.placeholder.includes("Please write your feedback")) {
+        contactTextarea.placeholder = "여기에 입력해주세요 :D";
+    }
+    
+    const contactInput = document.querySelector(".contact_input");
+    if (contactInput && contactInput.placeholder.includes("Enter your email")) {
+        contactInput.placeholder = "여기에 입력해주세요 :D";
+    }
+    
+    const textbox = document.querySelector("#textbox");
+    if (textbox && textbox.placeholder.includes("Type your message")) {
+        textbox.placeholder = "여기에 메시지를 입력하세요.";
+    }
+    
+    const AItextbox2 = document.querySelector("#AItextbox");
+    if (AItextbox2 && AItextbox2.placeholder.includes("Type your message")) {
+        AItextbox2.placeholder = "여기에 메시지를 입력하세요.";
+    }
+    
+    const profileMessage = document.querySelector("#edit_profile_message");
+    if (profileMessage && profileMessage.placeholder.includes("Enter your status")) {
+        profileMessage.placeholder = "여기에 상태메시지 입력";
+    }
+    
+    const groupChatInput = document.querySelector("#input-make-group-chat");
+    if (groupChatInput && groupChatInput.placeholder.includes("Enter group chat")) {
+        groupChatInput.placeholder = "그룹챗 이름 입력";
+    }
+    
+    const friendInput = document.querySelector("#input-add-friend");
+    if (friendInput && friendInput.placeholder.includes("Enter friend")) {
+        friendInput.placeholder = "친구 아이디 입력";
+    }
+    
+    const groupInput = document.querySelector("#input-add-group");
+    if (groupInput && groupInput.placeholder.includes("Enter group chat")) {
+        groupInput.placeholder = "그룹챗 아이디 입력";
+    }
+    
+    // alt 텍스트들
+    const imageAlt = document.querySelector('img[alt="Send Image"]');
+    if (imageAlt) imageAlt.alt = "이미지보내기";
+    
+    const sendAlt = document.querySelectorAll('img[alt="Send"]');
+    sendAlt.forEach((img) => {
+        img.alt = "보내기";
+    });
+  }
+  
 
 input_login.addEventListener("click", async () => {
     if (input_id.value && input_pw.value) {
@@ -1058,15 +1818,29 @@ input_login.addEventListener("click", async () => {
                         my_pf = data.data.pf;
                         my_lang = data.data.lang;
                         my_light = data.data.light;
+                        my_TP = data.data.TP
                         if (data.data.light) {
                             document.body.classList.add('light-mode');
                         }
                         if (my_lang == "en") {
                             changeui_en();
+                        } else if (my_lang == "kr") {
+                            changeui_ko();
+                        }
+                        
+                        // 한국어가 아닌 사용자에게 번역 지연 안내 메시지 표시
+                        const translationInfo = document.querySelector("#information");
+                        if (translationInfo && my_lang !== "kr") {
+                            translationInfo.style.display = "block";
                         }
                         console.log(my_id);
                         display_friendlist();
                         display_grouplist();
+                        
+                        // 라이트모드 토글 설정
+                        setupLightModeToggle();
+                        setupTPToggle();
+                        
                         document.querySelector(".my_frofile").addEventListener('click',()=>{
                             display_edit_profile();
                         })
@@ -1110,6 +1884,10 @@ function display_edit_profile() {
     aichatting_div.style.display = "none";
     developVoiceContent_div.style.display = "none";
     developVoice_div.style.display = "none";
+    
+    // 프로필 편집 화면에서 라이트모드 토글 다시 설정
+    setupLightModeToggle();
+    setupTPToggle();
 }
 
 //data.message
@@ -1121,6 +1899,7 @@ let apply_editing_desc = document.querySelector("#apply_profile_edit");
 let profileImageInput = document.querySelector("#edit_profile_image");
 let previewProfileImg = document.querySelector("#preview_profile_img");
 let language_select = document.querySelector("#countrys");
+let TPcheckbox = document.querySelector('#translate-preview-toggle');
 //my_lang
 language_select.value = my_lang;
 
@@ -1139,11 +1918,17 @@ profileImageInput.addEventListener("change", () => {
 console.log(apply_editing_desc);
 
 apply_editing_desc.addEventListener("click", async () => {
+    const TPcheckbox = document.querySelector('#translate-preview-toggle'); // ✅ 매번 새로 가져오기
+    const lightModeToggle = document.querySelector('#light-mode-toggle');  // 이것도 같이!
+    console.log(input_editing_desc.value !== my_desc, selectedProfileBase64 !== "", language_select.value !== my_lang, TPcheckbox.checked !== my_TP);
+    console.log(my_desc, selectedProfileBase64, my_lang,my_light, my_TP);
+    console.log(input_editing_desc, selectedProfileBase64, language_select.value, lightModeToggle.checked, TPcheckbox.checked)
     if (
         input_editing_desc.value !== my_desc ||
         selectedProfileBase64 !== "" ||
         language_select.value !== my_lang ||
-        lightModeToggle.checked !== my_light
+        lightModeToggle.checked !== my_light ||
+        TPcheckbox.checked !== my_TP
     ) {
         console.log("OK!");
         edit_profile(
@@ -1151,7 +1936,8 @@ apply_editing_desc.addEventListener("click", async () => {
             input_editing_desc.value,
             selectedProfileBase64,
             language_select.value,
-            lightModeToggle.checked
+            lightModeToggle.checked,
+            TPcheckbox.checked
         ).then((data) => {
             console.log(data);
             if (data.message === "1") {
@@ -1159,7 +1945,7 @@ apply_editing_desc.addEventListener("click", async () => {
                 alert(RefreshToApply);
                 location.reload();
             } else {
-                alert("알 수 없는 오류가 발생했습니다.");
+                alert(UnknownError);
                 console.error("Front Error.");
                 display_friendlist();
             }
@@ -1170,19 +1956,32 @@ apply_editing_desc.addEventListener("click", async () => {
 
 let lightModeToggle = document.querySelector("#light-mode-toggle"); // 하이픈(-)으로!
 
-// 기존 라이트모드 상태 초기 반영 (불러온 값 기준)
-lightModeToggle.checked = my_light;
-if (my_light) document.body.classList.add("light-mode");
+// 라이트모드 토글 이벤트 리스너 설정 함수
+function setupLightModeToggle() {
+    lightModeToggle = document.querySelector("#light-mode-toggle");
+    if (lightModeToggle) {
+        // 기존 라이트모드 상태 초기 반영 (불러온 값 기준)
+        lightModeToggle.checked = my_light;
+        if (my_light) document.body.classList.add("light-mode");
 
-// 토글 시 화면에만 적용 (서버 저장은 '수정' 버튼 누를 때!)
-lightModeToggle.addEventListener("change", () => {
-    if (lightModeToggle.checked) {
-        document.body.classList.add("light-mode");
-    } else {
-        document.body.classList.remove("light-mode");
+        // 토글 시 화면에만 적용 (서버 저장은 '수정' 버튼 누를 때!)
+        lightModeToggle.addEventListener("change", () => {
+            if (lightModeToggle.checked) {
+                document.body.classList.add("light-mode");
+            } else {
+                document.body.classList.remove("light-mode");
+            }
+        });
     }
-});
+}
 
+function setupTPToggle() {
+    const TPToggle = document.querySelector('#translate-preview-toggle');
+    if (TPToggle) {
+        console.log("현재 my_TP:", my_TP);
+        TPToggle.checked = Boolean(my_TP); // ✅ 강제 논리형 변환
+    }
+}
 
 let apply_make_group_chat = document.querySelector("#apply_make_group_chat");
 let input_make_group_chat = document.querySelector("#input-make-group-chat");
@@ -1194,10 +1993,10 @@ input_add_group_btn.addEventListener('click', ()=>{
     if (input_add_group.value) {
         join_groupchat(input_add_group.value, my_id).then((data) => {
             if (data.message === "1") {
-                alert("그룹챗에 참여했습니다.");
+                alert(GroupJoined);
                 display_grouplist();
             } else {
-                alert("오류가 발생하여 그룹챗에 참여하지 못했습니다.");
+                alert(GroupJoinError);
             }
         });
     }
@@ -1255,7 +2054,7 @@ document.querySelectorAll(".menu_info").forEach((ele) => {
         } else if (menuType === "user_voice") {
             display_uservoice();
         }else {
-            alert("해당 기능은 아직 완성되지 않았습니다.")
+            alert(FeatureNotReady)
         }
     });
 });
@@ -1266,24 +2065,26 @@ document.querySelector(".submit_contact").addEventListener("click", async () => 
     const check = document.querySelector("#contact_check").checked;
 
     if (!check) {
-        alert("장난글이 아니라는 체크를 해주세요!");
+        alert(CheckNotPrank);
         return;
     }
 
     if (!email || !content) {
-        alert("이메일과 내용을 모두 입력해주세요.");
+        alert(FillEmailContent);
         return;
     }
 
     const result = await submit_contact(my_id, content, email);
 
     if (result && result.success) {
-        alert("문의가 성공적으로 접수되었습니다! ✉️");
+        alert(ContactSuccess);
         // 초기화도 가능:
         document.querySelector("#contact_email").value = "";
         document.querySelector("#contact_content").value = "";
         document.querySelector("#contact_check").checked = false;
     } else {
-        alert("문의 전송에 실패했습니다. 다시 시도해주세요. ⚠️");
+        alert(ContactFailed);
     }
 });
+
+Notification.requestPermission()

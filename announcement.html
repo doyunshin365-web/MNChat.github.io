@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공지사항 등록</title>
+    <style>
+      body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+      .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+      input, textarea { width: 100%; margin-bottom: 10px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; }
+      button { background: #4caf50; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+      button:hover { background: #45a049; }
+      .checkbox { display: flex; align-items: center; gap: 10px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>MNChat 공지사항 등록</h2>
+      <input type="text" id="title" placeholder="제목을 입력하세요" />
+      <textarea id="content" rows="6" placeholder="내용을 입력하세요"></textarea>
+      <div class="checkbox">
+        <input type="checkbox" id="important" />
+        <label for="important">중요 공지사항으로 등록</label>
+      </div>
+      <button id="submit">등록하기</button>
+      <p id="result"></p>
+    </div>
+
+    <script>
+      document.getElementById("submit").addEventListener("click", async () => {
+        const title = document.getElementById("title").value.trim();
+        const content = document.getElementById("content").value.trim();
+        const important = document.getElementById("important").checked;
+        const key = "ADMIN0011992";
+
+        if (!title || !content) {
+          document.getElementById("result").textContent = "제목과 내용을 모두 입력해주세요.";
+          return;
+        }
+
+        try {
+          const res = await fetch("localhost:3000/api/developvoice", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, content, important, key}),
+          });
+
+          const data = await res.json();
+          document.getElementById("result").textContent = data.message;
+
+          if (res.ok) {
+            document.getElementById("title").value = "";
+            document.getElementById("content").value = "";
+            document.getElementById("important").checked = false;
+          }
+        } catch (err) {
+          document.getElementById("result").textContent = "서버 오류가 발생했습니다.";
+        }
+      });
+    </script>
+  </body>
+</html>

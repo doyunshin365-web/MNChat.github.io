@@ -81,7 +81,7 @@ body {
     height: 100%;
     margin: 0;
 }
-.chatting, .main-menu, .login, .profile-edit, .make_group_chat, .AIchatting {
+.chatting, .main-menu, .login, .profile-edit, .make_group_chat, .AIchatting, .user_voice {
     width: 460px;
     background-color: black;
     display: flex;
@@ -104,7 +104,7 @@ body {
     flex-direction: column;
 }
 
-#input-id, #input-pw, #input-add-friend, #input-add-group, #input-make-group-chat {
+#input-id, #input-pw, #input-add-friend, #input-add-group, #input-make-group-chat, #edit_profile_message, #countrys {
     margin-top: 15px;
     width: 100%;
     border: #212224 solid 2px;
@@ -361,7 +361,7 @@ body {
     gap: 8px;
 }
 
-.contact_checkbox {
+.contact_checkbox, #light-mode-toggle, #translate-preview-toggle {
     width: 18px;
     height: 18px;
     accent-color: #0A84FF; /* 체크박스 색상 */
@@ -372,7 +372,7 @@ body {
     font-size: 14px;
 }
 
-.submit_contact {
+.submit_contact, #apply_profile_edit {
     width: 100%;
     padding: 10px;
     background-color: #eeeeee;
@@ -383,7 +383,7 @@ body {
     font-weight: bold;
 }
 
-.submit_contact:hover {
+.submit_contact:hover, #apply_profile_edit:hover {
     background-color: #0A84FF;
     color: white;
     transform: translateY(-3px);
@@ -402,6 +402,91 @@ body {
     font-size: 15px;
 }
 
+.previewtranslate {
+    position: fixed;         /* 스크롤과 무관하게 화면 고정 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);  /* 정확히 정중앙으로 이동 */
+    z-index: 9999;           /* 다른 모든 요소 위에 띄움 */
+}
+
+.previewtranslate {
+    width: 280px;
+    padding: 20px;
+    background: #333333;
+    color: #fff;
+    border-radius: 30px;
+    text-align: left;
+    font-family: "Pretendard", "Noto Sans KR", sans-serif;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+  
+  .previewtranslate strong {
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .previewtranslate p {
+    font-size: 0.85rem;
+    color: #ccc;
+    margin: 0 0 25px 0;
+  }
+  
+  .previewtranslate .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .previewtranslate button {
+    background-color: #0A84FF;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+  
+  .previewtranslate button:hover {
+    background-color: #fff;
+  }
+  
+  .translation_result {
+    color: white;
+  }
+
+/* 라이트모드 - 번역 팝업 스타일 */
+.light-mode .previewtranslate {
+  background: #ffffff;
+  color: #333333;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.light-mode .previewtranslate strong {
+  color: #333333;
+}
+
+.light-mode .previewtranslate p {
+  color: #666666;
+}
+
+.light-mode .previewtranslate button {
+  background-color: #007bff;
+  color: white;
+}
+
+.light-mode .previewtranslate button:hover {
+  background-color: #0056b3;
+}
+
+.light-mode .translation_result {
+  color: #333333;
+}
 
 /* ---------------------- 화이트 모드 스타일 ---------------------- */
 
@@ -428,7 +513,8 @@ body.light-mode {
 .light-mode .make_group_chat,
 .light-mode .AIchatting,
 .light-mode .developVoice,
-.light-mode .developVoiceContent {
+.light-mode .developVoiceContent,
+.light-mode .user_voice {
     background-color: #ffffff !important;
 }
 
@@ -473,7 +559,9 @@ body.light-mode {
 .light-mode #input-pw,
 .light-mode #input-add-friend,
 .light-mode #input-add-group,
-.light-mode #input-make-group-chat {
+.light-mode #input-make-group-chat,
+.light-mode #edit_profile_message,
+.light-mode #countrys {
     background-color: #ffffff;
     color: #000000;
     border: #cccccc solid 2px;
@@ -582,16 +670,16 @@ body.light-mode {
 }
 
 .bell-icon {
-    width: 24px;
-    height: 24px;
+    width: 50px;
+    height: 50px;
     -webkit-mask: url('../svgs/bell.svg') no-repeat center;
     mask: url('../svgs/bell.svg') no-repeat center;
     background-color: #d8000c;
 }
 
 .bell-icon-default {
-    width: 24px;
-    height: 24px;
+    width: 50px;
+    height: 50px;
     -webkit-mask: url('../svgs/bell.svg') no-repeat center;
     mask: url('../svgs/bell.svg') no-repeat center;
     background-color: #242424;
@@ -636,3 +724,7 @@ body.light-mode {
     white-space: pre-wrap; /* 줄바꿈 + 공백 유지 */
   }
   
+  .buttons {
+    display: flex;
+  }
+

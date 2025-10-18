@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     profileImage: { type: String, default: 'Default' },
     country: { type: String, default: 'kr' },
     light: { type: Boolean, default: false },
+    translatepreview: { type: Boolean, default: false },
     ainovaHistory: {type: Array, default: [{role: "assistant", content: "안녕!"}]}
 });
 

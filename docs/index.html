@@ -6,301 +6,339 @@
         <title>채팅앱</title>
         <link rel="stylesheet" href="./styles/style.css" />
     </head>
+    
     <body>
-        <div class="login">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p id="app-title">로그인</p>
-            </div>
-            <strong>MN Chat에 오신 것을 환영합니다.</strong>
-            <div class="login-form">
-                <input type="text" id="input-id" placeholder="ID 입력" />
-                <input
-                    type="password"
-                    id="input-pw"
-                    placeholder="비밀번호 입력"
-                />
-                <button id="input-login">로그인</button>
-                <p>계정이 없으시다면:</p>
-                <button id="input-register">회원가입</button>
-                
-                <!-- 언어 선택 -->
-                <div style="margin-top: 15px; text-align: center;">
-                    <label for="language-select" style="color: #ccc; font-size: 0.9rem;">Language / 언어:</label>
-                    <select id="language-select" style="margin-top: 5px; padding: 5px; border-radius: 5px; background-color: #333; color: white; border: 1px solid #555;">
-                        <option value="kr">한국어</option>
-                        <option value="en">English</option>
-                    </select>
+        <div class="root">
+            <div class="main-menu-navigation">
+                <img src="./imgs/logo_white.png">
+                <div class="onlyicon">
+                    <img src="./svgs/profile.svg" id="item_profile2">
+                    <img src="./svgs/friends.svg" id="item_friends2">
+                    <img src="./svgs/group.svg" id="item_group2">
+                    <img src="./svgs/add.svg" id="item_addfriends2">
+                    <img src="./svgs/announce.svg" id="item_announce2">
                 </div>
-            </div>
-        </div>
-
-        <div class="make_group_chat" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p id="app-title">그룹챗 만들기</p>
-            </div>
-            <strong>그룹챗 만들기</strong>
-            <div class="make-group-chat-form">
-                <input
-                    type="text"
-                    id="input-make-group-chat"
-                    placeholder="그룹챗 이름 입력"
-                />
-            </div>
-            <button id="apply_make_group_chat">그룹챗 만들기</button>
-        </div>
-
-        <div class="banned-div" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p id="app-title">서비스 이용 불가 안내</p>
-            </div>
-            <strong>차단되었습니다.</strong>
-            <p>
-                <strong>정보통신망 이용촉진 및 정보보호 등에 관한 법률</strong
-                >에 의거, 부적절한 표현 사용 혹은 사기로 의해 차단당하셨습니다.
-            </p>
-            <br />
-            <strong>사유:</strong>
-            <p id="ban_reason">로딩중 입니다...</p>
-        </div>
-
-        <div class="main-menu">
-            <br>
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p id="app-title">MN Chat</p>
-            </div>
-            <br>
-            <div class="importantArticle" style="display: flex;">
-                <img src="../svgs/bell.svg" class="bell-icon">
-                <div style="display: block;">
-                    <strong>로딩중 입니다...</strong>
-                    <p>로딩중 입니다...</p>
-                </div>
-            </div>
-            <strong>내 프로필</strong>
-            <div class="my_frofile">
-                <img
-                    src="./imgs/default_pfp.png"
-                    id="my_pf"
-                    class="user-icon"
-                />
-                <div class="user-info">
-                    <strong class="user-name" id="my_name"
-                        >로딩중 입니다...</strong
-                    >
-                    <p class="user-description" id="my_desc">
-                        로딩중 입니다...
-                    </p>
-                </div>
-            </div>
-            <strong>친구</strong>
-            <div class="friends_container">
-                <!-- JS 추가해라- -->
-            </div>
-            <strong>그룹챗</strong>
-            <div class="groups_container">
-                <!-- JS 추가해라- -->
-                 <!-- <div class="grouptable">
-                    <div class="group_info">
-                        <strong class="group_name">테스트입니다.</strong>
-                        <p class="group_id">test</strong>
+                <div class="full" style="display: none;">
+                    <div class="navigation_item" id="item_profile">
+                        <img src="./svgs/profile.svg">
+                        <p>내 프로필</p>
                     </div>
-                 </div> -->
-            </div>
-            <button id="make_group_chat">그룹챗 만들기</button>
-            <strong>친구 추가</strong>
-            <div class="add-friend-form">
-                <input
-                    type="text"
-                    id="input-add-friend"
-                    placeholder="친구 아이디 입력"
-                />
-                <button id="input-add-friend-btn">친구 추가</button>
-            </div>
-            <strong>그룹챗 추가</strong>
-            <div class="add-group-form">
-                <input
-                    type="text"
-                    id="input-add-group"
-                    placeholder="그룹챗 아이디 입력"
-                />
-                <button id="input-add-group-btn">그룹챗 추가</button>
-            </div>
-            <strong>문의사항</strong>
-            <div class="menutable">
-                <div class="menu_info">
-                    <strong class="menu_name">유저의 소리📢</strong>
-                    <p class="menu_desc" data-menu="user_voice">개발자야 이것좀 고쳐봐!</p>
+                    <div class="navigation_item" id="item_friends">
+                        <img src="./svgs/friends.svg">
+                        <p>친구</p>
+                    </div>
+                    <div class="navigation_item" id="item_group">
+                        <img src="./svgs/group.svg">
+                        <p>그룹챗</p>
+                    </div>
+                    <div class="navigation_item" id="item_addfriends">
+                        <img src="./svgs/add.svg">
+                        <p>추가</p>
+                    </div>
+                    <div class="navigation_item" id="item_announce">
+                        <img src="./svgs/announce.svg">
+                        <p>공지사항</p>
+                    </div>
                 </div>
-             </div>
-             <div class="menutable">
-                 <div class="menu_info">
-                     <strong class="menu_name">개발자의 소리📢</strong>
-                     <p class="menu_desc" data-menu="developer_voice">개발자야 너 뭐하냐</p>
-                 </div>
-             </div>
-            <br>
-        </div>
-        <div class="profile-edit" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p id="app-title">MN Chat</p>
             </div>
-            <strong>프로필 수정</strong>
+            <div class="login">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p id="app-title">로그인</p>
+                </div>
+                <strong>MN Chat에 오신 것을 환영합니다.</strong>
+                <div class="login-form">
+                    <input type="text" id="input-id" placeholder="ID 입력" />
+                    <input
+                        type="password"
+                        id="input-pw"
+                        placeholder="비밀번호 입력"
+                    />
+                    <button id="input-login">로그인</button>
+                    <p>계정이 없으시다면:</p>
+                    <button id="input-register">회원가입</button>
+                    
+                    <!-- 언어 선택 -->
+                    <div style="margin-top: 15px; text-align: center;">
+                        <label for="language-select" style="color: #ccc; font-size: 0.9rem;">Language / 언어:</label>
+                        <select id="language-select" style="margin-top: 5px; padding: 5px; border-radius: 5px; background-color: #333; color: white; border: 1px solid #555;">
+                            <option value="kr">한국어</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-            <div class="my_profile">
-                <!-- 프로필 이미지 미리보기 -->
-                <img
-                    id="preview_profile_img"
-                    src="./imgs/default_pfp.png"
-                    class="user-icon"
-                />
-
-                <!-- 이미지 업로드 -->
-                <input
-                    type="file"
-                    id="edit_profile_image"
-                    accept="image/*"
-                    style="margin-top: 10px"
-                />
-
-                <!-- 상태 메시지 -->
-                <div class="user-info">
-                    <strong>상태메시지 수정</strong> <br />
+            <div class="make_group_chat" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p id="app-title">그룹챗 만들기</p>
+                </div>
+                <strong>그룹챗 만들기</strong>
+                <div class="make-group-chat-form">
                     <input
                         type="text"
-                        id="edit_profile_message"
-                        placeholder="여기에 상태메시지 입력"
+                        id="input-make-group-chat"
+                        placeholder="그룹챗 이름 입력"
                     />
-                    <br />
-                    <strong>언어 수정</strong> <br />
-                    <select name="countrys" id="countrys">
-                        <option value="kr">한국어</option>
-                        <option value="en">English</option>
-                    </select>
-                    <br />
-                    <!-- 체크박스와 라벨 -->
-                    <label>
-                        <input type="checkbox" id="light-mode-toggle">
-                        라이트모드
-                    </label>
-                    <label>
-                        <input type="checkbox" id="translate-preview-toggle">
-                        번역 미리보기
-                    </label>
-                    <br />
                 </div>
+                <button id="apply_make_group_chat">그룹챗 만들기</button>
             </div>
 
-            <button id="apply_profile_edit">적용</button>
-        </div>
-
-        <div class="chatting" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p id="partner-id">로딩중입니다...</p>
+            <div class="banned-div" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p id="app-title">서비스 이용 불가 안내</p>
+                </div>
+                <strong>차단되었습니다.</strong>
+                <p>
+                    <strong>정보통신망 이용촉진 및 정보보호 등에 관한 법률</strong
+                    >에 의거, 부적절한 표현 사용 혹은 사기로 의해 차단당하셨습니다.
+                </p>
+                <br />
+                <strong>사유:</strong>
+                <p id="ban_reason">로딩중 입니다...</p>
             </div>
-            <div class="container"></div>
-            <div class="previewtranslate" style="display: none;">
-                <strong>번역 미리보기</strong>
-                <p>AI는 실수할 수 있습니다. AI번역 결과를 보시고, 다시 생성할지 결정해주십시오.</p>
-                <p id="translation_result"><!-- JS가 채울거임 --></p>
-                <div class="buttons">
-                    <button id="confirm_translate">확인</button>
-                    <button id="reload_translate">재생성</button>
+
+            <div class="main-menu">
+                <div class="main-menu-container">
+                    <br>
+                    <div class="menu">
+                        <img class="back_main" src="svgs/back.svg" alt="" />
+                        <p id="app-title">MN Chat</p>
+                    </div>
+                    <br>
+                    <div class="importantArticle" style="display: flex;">
+                        <img src="../svgs/bell.svg" class="bell-icon">
+                        <div style="display: block;">
+                            <strong>로딩중 입니다...</strong>
+                            <p>로딩중 입니다...</p>
+                        </div>
+                    </div>
+                    <strong id="profile_section">내 프로필</strong>
+                    <div class="my_frofile">
+                        <img
+                            src="./imgs/default_pfp.png"
+                            id="my_pf"
+                            class="user-icon"
+                        />
+                        <div class="user-info">
+                            <strong class="user-name" id="my_name"
+                                >로딩중 입니다...</strong
+                            >
+                            <p class="user-description" id="my_desc">
+                                로딩중 입니다...
+                            </p>
+                        </div>
+                    </div>
+                    <strong id="friend_section">친구</strong>
+                    <div class="friends_container">
+                        <!-- JS 추가해라- -->
+                    </div>
+                    <strong id="group_section">그룹챗</strong>
+                    <div class="groups_container">
+                        <!-- JS 추가해라- -->
+                        <!-- <div class="grouptable">
+                            <div class="group_info">
+                                <strong class="group_name">테스트입니다.</strong>
+                                <p class="group_id">test</strong>
+                            </div>
+                        </div> -->
+                    </div>
+                    <button id="make_group_chat">그룹챗 만들기</button>
+                    <strong id="addfriend_section">친구 추가</strong>
+                    <div class="add-friend-form">
+                        <input
+                            type="text"
+                            id="input-add-friend"
+                            placeholder="친구 아이디 입력"
+                        />
+                        <button id="input-add-friend-btn">친구 추가</button>
+                    </div>
+                    <strong id="addgroup_section">그룹챗 추가</strong>
+                    <div class="add-group-form">
+                        <input
+                            type="text"
+                            id="input-add-group"
+                            placeholder="그룹챗 아이디 입력"
+                        />
+                        <button id="input-add-group-btn">그룹챗 추가</button>
+                    </div>
+                    <strong id="announce_section">문의사항</strong>
+                    <div class="menutable">
+                        <div class="menu_info">
+                            <strong class="menu_name">유저의 소리📢</strong>
+                            <p class="menu_desc" data-menu="user_voice">개발자야 이것좀 고쳐봐!</p>
+                        </div>
+                    </div>
+                    <div class="menutable">
+                        <div class="menu_info">
+                            <strong class="menu_name">개발자의 소리📢</strong>
+                            <p class="menu_desc" data-menu="developer_voice">개발자야 너 뭐하냐</p>
+                        </div>
+                    </div>
+                    <br>
                 </div>
             </div>
-            <div class="tools">
-                <div class="input-box">
+            <div class="profile-edit" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p id="app-title">MN Chat</p>
+                </div>
+                <strong>프로필 수정</strong>
+
+                <div class="my_profile">
+                    <!-- 프로필 이미지 미리보기 -->
+                    <img
+                        id="preview_profile_img"
+                        src="./imgs/default_pfp.png"
+                        class="user-icon"
+                    />
+
+                    <!-- 이미지 업로드 -->
                     <input
                         type="file"
-                        id="image-upload"
+                        id="edit_profile_image"
                         accept="image/*"
-                        style="display: none"
+                        style="margin-top: 10px"
                     />
-                    <button id="upload-btn">
-                        <img src="./svgs/image.svg" alt="이미지보내기" />
-                    </button>
-                    <input
-                        id="textbox"
-                        type="text"
-                        placeholder="여기에 메시지를 입력하세요."
-                    />
-                    <button id="send_btn">
-                        <img src="./svgs/send.svg" alt="보내기" />
-                    </button>
+
+                    <!-- 상태 메시지 -->
+                    <div class="user-info">
+                        <strong>상태메시지 수정</strong> <br />
+                        <input
+                            type="text"
+                            id="edit_profile_message"
+                            placeholder="여기에 상태메시지 입력"
+                        />
+                        <br />
+                        <strong>언어 수정</strong> <br />
+                        <select name="countrys" id="countrys">
+                            <option value="kr">한국어</option>
+                            <option value="en">English</option>
+                        </select>
+                        <br />
+                        <!-- 체크박스와 라벨 -->
+                        <label>
+                            <input type="checkbox" id="light-mode-toggle">
+                            라이트모드
+                        </label>
+                        <label>
+                            <input type="checkbox" id="translate-preview-toggle">
+                            번역 미리보기
+                        </label>
+                        <br />
+                    </div>
+                </div>
+
+                <button id="apply_profile_edit">적용</button>
+            </div>
+
+            <div class="chatting" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p id="partner-id">로딩중입니다...</p>
+                </div>
+                <div class="container"></div>
+                <div class="previewtranslate" style="display: none;">
+                    <strong>번역 미리보기</strong>
+                    <p>AI는 실수할 수 있습니다. AI번역 결과를 보시고, 다시 생성할지 결정해주십시오.</p>
+                    <p id="translation_result"><!-- JS가 채울거임 --></p>
+                    <input type="text" placeholder="번역할때 AI가 참고할게요!" id="translation_prompt">
+                    <div class="buttons">
+                        <button id="confirm_translate">확인</button>
+                        <button id="reload_translate">재생성</button>
+                    </div>
+                </div>
+                <div class="tools">
+                    <div class="input-box">
+                        <input
+                            type="file"
+                            id="image-upload"
+                            accept="image/*"
+                            style="display: none"
+                        />
+                        <button id="upload-btn">
+                            <img src="./svgs/image.svg" alt="이미지보내기" />
+                        </button>
+                        <input
+                            id="textbox"
+                            type="text"
+                            placeholder="여기에 메시지를 입력하세요."
+                        />
+                        <button id="send_btn">
+                            <img src="./svgs/send.svg" alt="보내기" />
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="AIchatting" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p>Nova AI</p>
-            </div>
-            <div class="AIcontainer"></div>
-            <div class="tools">
-                <div class="input-box">
-                    <input
-                        id="AItextbox"
-                        type="text"
-                        placeholder="여기에 메시지를 입력하세요."
-                    />
-                    <button id="AIsend_btn">
-                        <img src="./svgs/send.svg" alt="보내기" />
-                    </button>
+            <div class="AIchatting" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p>Nova AI</p>
+                </div>
+                <div class="AIcontainer"></div>
+                <div class="tools">
+                    <div class="input-box">
+                        <input
+                            id="AItextbox"
+                            type="text"
+                            placeholder="여기에 메시지를 입력하세요."
+                        />
+                        <button id="AIsend_btn">
+                            <img src="./svgs/send.svg" alt="보내기" />
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="user_voice" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p>유저의 소리📢</p>
-            </div>
-            <strong>문의사항</strong>
-            <p>MN Chat의 발전에 기여해주세요!</p>
-            <div class="menu_info contact_form">
-                <textarea class="contact_textarea" placeholder="여기에 입력해주세요 :D" id="contact_content"></textarea>
-                <p>답변받을 메일주소를 작성해주세요.</p>
-                <input type="email" id="contact_email" class="contact_input" placeholder="여기에 입력해주세요 :D">
-                <div class="contact_checkbox_wrap">
-                  <input type="checkbox" id="contact_check" class="contact_checkbox">
-                  <label for="contact_check" class="contact_label">장난글이 아닙니다.</label>
+            <div class="user_voice" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p>유저의 소리📢</p>
                 </div>
-            
-                <button class="submit_contact">완료</button>
-              </div>
-        </div>
-
-        <div class="developVoice" style="display: none">
-            <div class="menu">
-                <img class="back_main" src="svgs/back.svg" alt="" />
-                <p>개발자의 소리📢</p>
-            </div>
-            <strong>패치노트 및 공지사항!</strong>
-            <div class="contentContainer">
+                <strong>문의사항</strong>
+                <p>MN Chat의 발전에 기여해주세요!</p>
+                <div class="menu_info contact_form">
+                    <textarea class="contact_textarea" placeholder="여기에 입력해주세요 :D" id="contact_content"></textarea>
+                    <p>답변받을 메일주소를 작성해주세요.</p>
+                    <input type="email" id="contact_email" class="contact_input" placeholder="여기에 입력해주세요 :D">
+                    <div class="contact_checkbox_wrap">
+                    <input type="checkbox" id="contact_check" class="contact_checkbox">
+                    <label for="contact_check" class="contact_label">장난글이 아닙니다.</label>
+                    </div>
                 
+                    <button class="submit_contact">완료</button>
+                </div>
             </div>
-            <p id="information" style="display: none;">If you are using a language other than Korean, posts may appear with a slight delay due to translation.</p>
-        </div>
 
-        <div class="developVoiceContent" style="display: none">
-            <div class="menu">
-                <img class="back_developvoice" src="svgs/back.svg" alt="" />
-                <p>개발자의 소리📢</p>
+            <div class="developVoice" style="display: none">
+                <div class="menu">
+                    <img class="back_main" src="svgs/back.svg" alt="" />
+                    <p>개발자의 소리📢</p>
+                </div>
+                <strong>패치노트 및 공지사항!</strong>
+                <div class="contentContainer">
+                    
+                </div>
+                <p id="information" style="display: none;">If you are using a language other than Korean, posts may appear with a slight delay due to translation.</p>
             </div>
-            <div class="voicecontent">
-                <strong class="voice-title">타이틀 로드중</strong>
-                <p class="voice-text">내용 로드중</p>
+
+            <div class="developVoiceContent" style="display: none">
+                <div class="menu">
+                    <img class="back_developvoice" src="svgs/back.svg" alt="" />
+                    <p>개발자의 소리📢</p>
+                </div>
+                <div class="voicecontent">
+                    <strong class="voice-title">타이틀 로드중</strong>
+                    <p class="voice-text">내용 로드중</p>
+                </div>
             </div>
-        </div>
-        
-        <script src="socket.io/socket.io.js"></script>
-        <script src="scripts/chatting.js"></script>
-        <script src="scripts/script.js"></script>
-    </body>
+            
+            <script src="socket.io/socket.io.js"></script>
+            <script src="scripts/chatting.js"></script>
+            <script src="scripts/script.js"></script>
+        </body>
+    </div>
 </html>

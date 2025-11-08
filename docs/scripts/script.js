@@ -128,11 +128,11 @@ async function edit_profile(id, mes, pf, country, light, TP) {
 }
 
 
-async function translate_text(country1, country2, content) {
+async function translate_text(country1, country2, content, note) {
     const res = await fetch("/translation", {  // 서버의 번역 엔드포인트
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ country1, country2, content })
+        body: JSON.stringify({ country1, country2, content, note })
     });
 
     const data = await res.json();

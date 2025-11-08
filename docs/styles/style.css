@@ -8,6 +8,11 @@ html, body {
     color: white;
 }
 
+.root {
+    height: 100%;
+    margin: 0;
+}
+
 strong {
     margin: 0;
 }
@@ -81,7 +86,15 @@ body {
     height: 100%;
     margin: 0;
 }
-.chatting, .main-menu, .login, .profile-edit, .make_group_chat, .AIchatting, .user_voice {
+.chatting, .login, .profile-edit, .make_group_chat, .AIchatting, .user_voice {
+    width: 460px;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.main-menu {
     width: 460px;
     background-color: black;
     display: flex;
@@ -728,3 +741,156 @@ body.light-mode {
     display: flex;
   }
 
+.main-menu-container {
+    display: block;
+    overflow-y: auto;
+    height: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.main-menu-navigation {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 100vh;
+    background-color: #1a1a1a;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    box-sizing: border-box;
+}
+
+.main-menu-navigation > img {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.main-menu-navigation > img:hover {
+    transform: scale(1.1);
+}
+
+.main-menu-navigation .onlyicon {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.main-menu-navigation .onlyicon img {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.main-menu-navigation .onlyicon img:hover {
+    opacity: 1;
+}
+
+.main-menu-navigation .full {
+    position: fixed;
+    left: 100px;
+    top: 0;
+    width: 200px;
+    height: 100vh;
+    background-color: #212224;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.navigation_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.navigation_item:hover {
+    background-color: #2a2a2c;
+}
+
+.navigation_item img {
+    width: 24px;
+    height: 24px;
+}
+
+.navigation_item p {
+    margin: 0;
+    font-size: 16px;
+    color: white;
+}
+
+/* 모바일 반응형: 작은 화면에서 네비게이션 조정 */
+@media (max-width: 768px) {
+    .main-menu-navigation {
+        width: 60px;
+        padding: 15px 0;
+    }
+    
+    .main-menu-navigation > img {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 15px;
+    }
+    
+    .main-menu-navigation .onlyicon img {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .main-menu-navigation .full {
+        left: 60px;
+        width: 180px;
+    }
+}
+
+/* 매우 작은 화면(휴대폰)에서는 네비게이션을 완전히 오버레이로 처리하여 메인메뉴를 가리지 않도록 */
+@media (max-width: 600px) {
+    .main-menu-navigation {
+        width: 50px;
+        z-index: 1001;
+        /* 네비게이션이 메인메뉴 위에 오버레이로 표시되도록 */
+        position: fixed;
+    }
+    
+    .main-menu-navigation .full {
+        left: 50px;
+        width: 160px;
+        z-index: 1000;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+        /* full 메뉴도 오버레이로 */
+        position: fixed;
+    }
+    
+    /* 메인메뉴는 중앙에 그대로 유지되도록, 네비게이션 공간을 고려 */
+    .main-menu {
+        position: relative;
+        z-index: 1;
+        /* 메인메뉴가 네비게이션 공간을 차지하지 않도록 */
+        margin-left: 0;
+        width: calc(100% - 50px);
+        max-width: 410px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+    
+    /* body는 중앙 정렬 유지, 네비게이션은 오버레이 */
+    body {
+        padding-left: 0;
+    }
+}

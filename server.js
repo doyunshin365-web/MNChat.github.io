@@ -313,10 +313,10 @@ app.post("/ban_check", async (req, res) => {
 });
 
 app.post("/translation", async (req, res) => {
-  const { country1, country2, content } = req.body;
+  const { country1, country2, content, note } = req.body;
 
   try {
-    const result = await translation(country1, country2, content);
+    const result = await translation(country1, country2, content, note);
     res.json(result);
   } catch (err) {
     console.error("Translation API failed:", err.message);
@@ -466,7 +466,7 @@ app.post("/submit_contact", async (req, res) => {
 });
 
 
-async function translation(country1, country2, content) {
+async function translation(country1, country2, content, note) {
   const url = "https://api.mistral.ai/v1/agents/completions";
   const api_key = "wHvwPFXbhW6BKFso2jWkjEU8VUjNC5Mh";
   const headers = {
@@ -479,6 +479,7 @@ async function translation(country1, country2, content) {
       role: "user",
       content: `
         Can you translate to ${country2} that is spoken with ${country1}?
+        Note: ${note}
         Content:
         ${content}
       `,

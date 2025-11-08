@@ -9,6 +9,7 @@ let chat_method = 0;
 let make_group_chat_div = document.querySelector(".make_group_chat");
 let chatting_div = document.querySelector(".chatting");
 let mainmenu_div = document.querySelector(".main-menu");
+let mainmenu_navigation_div = document.querySelector(".main-menu-navigation");
 let login_div = document.querySelector(".login");
 let edit_profile_div = document.querySelector(".profile-edit");
 let aichatting_div = document.querySelector(".AIchatting");
@@ -222,7 +223,7 @@ function make_partner_chat_otherlang(content, partner_lang, partner, foreign_ver
             if (foreign_ver) {
                 result = foreign_ver; // 이미 번역본을 제공해줬음
             } else {
-                result = await translate_text(partner_lang, my_lang, content); // 제공이 안되어있음
+                result = await translate_text(partner_lang, my_lang, content, "."); // 제공이 안되어있음
             }
             translated.textContent = result;
             btn.style.display = "none"; // 번역 끝나면 버튼 숨기기
@@ -275,7 +276,7 @@ function make_group_partner_chat_otherlang(content, partner_lang, partner, forei
             if (foreign_ver) {
                 result = foreign_ver; // 이미 번역본을 제공해줬음
             } else {
-                result = await translate_text(partner_lang, my_lang, content); // 제공이 안되어있음
+                result = await translate_text(partner_lang, my_lang, content, "."); // 제공이 안되어있음
             }
             translated.textContent = result;
             btn.style.display = "none"; // 번역 끝나면 버튼 숨기기
@@ -295,7 +296,7 @@ async function waitForConfirm() {
     const result_translation = document.querySelector('#translation_result');
   
     async function doTranslate() {
-      const translated = await translate_text(my_lang, partner_lang, textbox.value);
+      const translated = await translate_text(my_lang, partner_lang, textbox.value, ".");
       if ('value' in result_translation) {
         result_translation.value = translated;
       } else {
@@ -332,12 +333,13 @@ async function waitForConfirm() {
 send_btn.addEventListener("click", async () => {
     let param = {};
     let foreign_ver = '';
+    let translation_prompt = document.querySelector('#translation_prompt').value;
     if (textbox.value) {
         if (my_lang !== partner_lang) {
             if (my_TP) {
                 await waitForConfirm();
             } else {
-                await translate_text(my_lang, partner_lang, textbox.value);
+                await translate_text(my_lang, partner_lang, textbox.value, translation_prompt);
             }
             foreign_ver = document.querySelector('#translation_result').value;
             make_my_chat(textbox.value);
@@ -428,6 +430,7 @@ async function enter_chat_room(partner) {
     partner_id = partner;
     chatting_div.style.display = "flex";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     chatting_div.querySelector(".back_main").style.display = "flex";
@@ -471,6 +474,7 @@ async function enter_chat_room(partner) {
 async function enter_groupchat_room(groupId) {
     chatting_div.style.display = "flex";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     chatting_div.querySelector(".back_main").style.display = "flex";
@@ -554,6 +558,7 @@ async function display_uservoice() {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     developVoice_div.style.display = "none";
@@ -568,6 +573,7 @@ async function display_developervoice() {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     developVoice_div.style.display = "flex";
@@ -653,6 +659,7 @@ async function display_developervoice_content(id) {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     userVoice_div.style.display = 'none';
@@ -702,6 +709,7 @@ async function display_friendlist() {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "flex";
+    mainmenu_navigation_div.style.display = "flex";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     developVoiceContent_div.style.display = "none";
@@ -937,6 +945,7 @@ async function enter_ai_chat_room() {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     aichatting_div.style.display = "flex";
     developVoiceContent_div.style.display = "none";
@@ -979,6 +988,7 @@ async function display_grouplist() {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "flex";
+    mainmenu_navigation_div.style.display = "flex";
     login_div.style.display = "none";
     aichatting_div.style.display = "none";
     developVoiceContent_div.style.display = "none";
@@ -1107,6 +1117,7 @@ socket.on("chatting", (data) => {
 make_group_chat_div.style.display = "none";
 chatting_div.style.display = "none";
 mainmenu_div.style.display = "none";
+mainmenu_navigation_div.style.display = "none";
 login_div.style.display = "flex";
 aichatting_div.style.display = "none";
 
@@ -1136,6 +1147,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function display_ban(reason) {
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     aichatting_div.style.display = "none";
     document.querySelector("#banned-div").style.display = "flex";
     document.querySelector("#ban_reason").textContent = reason;
@@ -1179,6 +1191,7 @@ function changeui_en() {
     Translating = "Loading translation...";
     Retranslating = "Reloading translation...";
     TranslationFailed = "Failed to load translation.";
+    document.querySelector('#translation_prompt').placeholder = "AI will refer to it when translating.";
     
     // 번역 지연 안내 메시지 영어로 변경
     const translationInfo = document.querySelector("#information");
@@ -1254,6 +1267,15 @@ function changeui_en() {
         if (el.dataset.menu === "developer_voice") el.textContent = "Developer updates & news";
       });
     }
+  
+    // [3-1] 네비게이션 메뉴
+    document.querySelectorAll(".navigation_item p").forEach((el) => {
+      if (el.textContent === "내 프로필") el.textContent = "My Profile";
+      if (el.textContent === "친구") el.textContent = "Friends";
+      if (el.textContent === "그룹챗") el.textContent = "Group Chats";
+      if (el.textContent === "추가") el.textContent = "Add";
+      if (el.textContent === "공지사항") el.textContent = "Announcements";
+    });
   
     // [4] 프로필 수정
     const profileEdit = document.querySelector(".profile-edit");
@@ -1501,6 +1523,7 @@ function changeui_ko() {
     Translating = "번역본을 불러오고 있습니다...";
     Retranslating = "번역본을 새로 불러오고 있습니다...";
     TranslationFailed = "번역본을 불러오지 못했습니다.";
+    document.querySelector('#translation_prompt').placeholder = "번역할때 AI가 참고할게요!";
     
     // 번역 지연 안내 메시지 한국어로 변경
     const translationInfo = document.querySelector("#information");
@@ -1576,6 +1599,15 @@ function changeui_ko() {
         if (el.dataset.menu === "developer_voice") el.textContent = "개발자야 너 뭐하냐";
       });
     }
+  
+    // [3-1] 네비게이션 메뉴
+    document.querySelectorAll(".navigation_item p").forEach((el) => {
+      if (el.textContent === "My Profile") el.textContent = "내 프로필";
+      if (el.textContent === "Friends") el.textContent = "친구";
+      if (el.textContent === "Group Chats") el.textContent = "그룹챗";
+      if (el.textContent === "Add") el.textContent = "추가";
+      if (el.textContent === "Announcements") el.textContent = "공지사항";
+    });
   
     // [4] 프로필 수정
     const profileEdit = document.querySelector(".profile-edit");
@@ -1879,6 +1911,7 @@ input_add_friend_btn.addEventListener("click", () => {
 function display_edit_profile() {
     chatting_div.style.display = "none";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     edit_profile_div.style.display = "flex";
     aichatting_div.style.display = "none";
@@ -2007,6 +2040,7 @@ function display_making_group() {
     chatting_div.style.display = "none";
     edit_profile_div.style.display = "none";
     mainmenu_div.style.display = "none";
+    mainmenu_navigation_div.style.display = "none";
     login_div.style.display = "none";
     make_group_chat_div.style.display = "flex";
     aichatting_div.style.display = "none";
@@ -2084,6 +2118,86 @@ document.querySelector(".submit_contact").addEventListener("click", async () => 
         document.querySelector("#contact_check").checked = false;
     } else {
         alert(ContactFailed);
+    }
+});
+
+// 네비게이션 메뉴 관련 이벤트 핸들러
+const navigationFull = document.querySelector(".main-menu-navigation .full");
+const navigationLogo = document.querySelector(".main-menu-navigation > img");
+const mainMenuContainer = document.querySelector(".main-menu-container");
+
+// 로고 클릭 시 full 메뉴 토글
+if (navigationLogo) {
+    navigationLogo.addEventListener("click", () => {
+        if (navigationFull) {
+            const isVisible = navigationFull.style.display !== "none";
+            navigationFull.style.display = isVisible ? "none" : "flex";
+        }
+    });
+}
+
+// 네비게이션 아이템 클릭 시 해당 section으로 스크롤
+function scrollToSection(sectionId) {
+    if (mainmenu_div.style.display === "none") {
+        return; // main-menu가 보이지 않으면 동작하지 않음
+    }
+    
+    const section = document.querySelector(sectionId);
+    if (!section) {
+        return;
+    }
+    
+    // main-menu-container가 스크롤 가능한 경우
+    if (mainMenuContainer) {
+        const containerRect = mainMenuContainer.getBoundingClientRect();
+        const sectionRect = section.getBoundingClientRect();
+        const scrollTop = mainMenuContainer.scrollTop || 0;
+        const targetScroll = scrollTop + sectionRect.top - containerRect.top - 20; // 20px 여백
+        
+        mainMenuContainer.scrollTo({
+            top: Math.max(0, targetScroll),
+            behavior: "smooth"
+        });
+    } else {
+        // main-menu-container가 없으면 main-menu에서 스크롤
+        const menuRect = mainmenu_div.getBoundingClientRect();
+        const sectionRect = section.getBoundingClientRect();
+        const scrollTop = mainmenu_div.scrollTop || 0;
+        const targetScroll = scrollTop + sectionRect.top - menuRect.top - 20;
+        
+        mainmenu_div.scrollTo({
+            top: Math.max(0, targetScroll),
+            behavior: "smooth"
+        });
+    }
+    
+    // full 메뉴 닫기
+    if (navigationFull) {
+        navigationFull.style.display = "none";
+    }
+}
+
+// 네비게이션 아이템 매핑
+const navigationMap = {
+    "item_profile": "#profile_section",
+    "item_profile2": "#profile_section",
+    "item_friends": "#friend_section",
+    "item_friends2": "#friend_section",
+    "item_group": "#group_section",
+    "item_group2": "#group_section",
+    "item_addfriends": "#addfriend_section",
+    "item_addfriends2": "#addfriend_section",
+    "item_announce": "#announce_section",
+    "item_announce2": "#announce_section"
+};
+
+// 모든 네비게이션 아이템에 이벤트 리스너 추가
+Object.keys(navigationMap).forEach(itemId => {
+    const element = document.querySelector(`#${itemId}`);
+    if (element) {
+        element.addEventListener("click", () => {
+            scrollToSection(navigationMap[itemId]);
+        });
     }
 });
 

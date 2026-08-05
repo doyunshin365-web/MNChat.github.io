@@ -32,6 +32,13 @@
 //     });
 // }
 
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + (localStorage.getItem('mnchat_token') || '')
+    };
+}
+
 // 기존 login 함수와 이름이 같은 이유로, try_login임
 /** 로그인 함수 (서버와 통신) */
 async function try_login(id, pw) {
@@ -41,6 +48,9 @@ async function try_login(id, pw) {
         body: JSON.stringify({ id, pw })
     });
     const data = await res.json();
+    if (data.message === "2" && data.token) {
+        localStorage.setItem('mnchat_token', data.token);
+    }
     return {data, id};
 }
 
@@ -57,7 +67,7 @@ async function try_register(id, pw) {
 async function get_friends(id) {
     const res = await fetch("/get_friends", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id })
     });
     const data = await res.json();
@@ -67,7 +77,7 @@ async function get_friends(id) {
 async function add_friend(id1, id2) {
     const res = await fetch("/add_friend", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id1, id2 })
     });
     const data = await res.json();
@@ -77,7 +87,7 @@ async function add_friend(id1, id2) {
 async function get_groups(id) {
     const res = await fetch("/get_groups", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id })
     });
 
@@ -89,7 +99,7 @@ async function get_groups(id) {
 async function get_groupchat_history(groupId) {
     const res = await fetch("/get_groupchat_history", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ groupId })
     });
 
@@ -100,7 +110,7 @@ async function get_groupchat_history(groupId) {
 async function get_chattings(id1, id2) {
     const res = await fetch("/get_chattings", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id1, id2 })
     });
     const data = await res.json();
@@ -110,7 +120,7 @@ async function get_chattings(id1, id2) {
 async function ban_check(id) {
     const res = await fetch("/ban_check", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id })
     });
     const data = await res.json();
@@ -120,7 +130,7 @@ async function ban_check(id) {
 async function edit_profile(id, mes, pf, country, light, TP) {
     const res = await fetch("/edit_profile", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id, mes, pf, country, light, TP })
     });
     const data = await res.json();
@@ -149,7 +159,7 @@ async function translate_text(country1, country2, content, note) {
 async function remove_friend(id1, id2) {
     const res = await fetch("/remove_friend", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id1, id2 })
     });
     const data = await res.json();
@@ -159,10 +169,10 @@ async function remove_friend(id1, id2) {
 async function create_groupchat({ title, maker }) {
     const res = await fetch("/create_groupchat", {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ title, maker }),
     });
-  
+
     const data = await res.json();
     return data;
   }
@@ -170,17 +180,17 @@ async function create_groupchat({ title, maker }) {
 async function leave_groupchat(groupId, userId) {
     const res = await fetch("/leave_groupchat", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ groupId, userId })
     });
     const data = await res.json();
     return data;
 }
-  
+
 async function join_groupchat(groupId, userId) {
     const res = await fetch("/join_groupchat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ groupId, userId }),
     });
 
@@ -191,7 +201,7 @@ async function join_groupchat(groupId, userId) {
 async function get_ainova_history(id) {
     const res = await fetch("/get_ainova_history", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id })
     });
     const data = await res.json();
@@ -201,7 +211,7 @@ async function get_ainova_history(id) {
 async function update_ainova_history(id, ainovaHistory) {
     const res = await fetch("/update_ainova_history", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ id, ainovaHistory })
     });
     const data = await res.json();
@@ -211,7 +221,7 @@ async function update_ainova_history(id, ainovaHistory) {
 async function nova_response(messages) {
     const res = await fetch("/nova_response", {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: getAuthHeaders(),
         body: JSON.stringify({ messages })
     });
     const data = await res.json();

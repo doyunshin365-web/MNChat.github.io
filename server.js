@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const path = require("path");
 const http = require("http");
 const User = require("./docs/models/Users");
@@ -32,6 +33,20 @@ app.use(cors()); // 쓸때만 켜두기ㅡㅡ
 
 const PORT = 5000;
 
+const JWT_SECRET = process.env.JWT_SECRET || "mnchat_dev_secret_change_me";
+
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "-3" });
+
+  jwt.verify(token, JWT_SECRET, (err, payload) => {
+    if (err) return res.status(403).json({ message: "-3" });
+    req.userId = payload.id;
+    next();
+  });
+}
+
 //로그인 구현
 app.post("/register", async (req, res) => {
   const { id, pw } = req.body;
@@ -51,17 +66,18 @@ app.post("/login", async (req, res) => {
 
   const match = await bcrypt.compare(pw, user.pw);
   if (!match) return res.status(400).json({ message: "-2" });
+  const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
   const desc = user.desc;
   const pf = user.profileImage;
   const lang = user.country;
   const light = user.light;
   const TP = user.translatepreview
 
-  res.json({ message: "2", desc, pf, lang, light, TP });
+  res.json({ message: "2", token, desc, pf, lang, light, TP });
 });
 
-app.post("/get_friends", async (req, res) => {
-  const { id } = req.body;
+app.post("/get_friends", authenticateToken, async (req, res) => {
+  const id = req.userId;
   const user = await User.findOne({ id });
   if (!user) return res.status(400).json({ message: "-1" });
 
@@ -77,8 +93,8 @@ app.post("/get_friends", async (req, res) => {
   res.json({ message: "2", friends: friendData });
 });
 
-app.post("/get_groups", async (req, res) => {
-  const { id } = req.body;
+app.post("/get_groups", authenticateToken, async (req, res) => {
+  const id = req.userId;
 
   // 유저 존재 여부 확인
   const user = await User.findOne({ id });
@@ -97,8 +113,9 @@ app.post("/get_groups", async (req, res) => {
   res.json({ message: "2", groups: groupData });
 });
 
-app.post("/add_friend", async (req, res) => {
-  const { id1, id2 } = req.body;
+app.post("/add_friend", authenticateToken, async (req, res) => {
+  const id1 = req.userId;
+  const { id2 } = req.body;
   const user1 = await User.findOne({ id: id1 });
   const user2 = await User.findOne({ id: id2 });
   if (!user1 || !user2) return res.status(400).json({ message: "-1" });
@@ -109,8 +126,9 @@ app.post("/add_friend", async (req, res) => {
   res.json({ message: "2" });
 });
 
-app.post("/remove_friend", async (req, res) => {
-  const { id1, id2 } = req.body;
+app.post("/remove_friend", authenticateToken, async (req, res) => {
+  const id1 = req.userId;
+  const { id2 } = req.body;
 
   // 유저 찾기
   const user1 = await User.findOne({ id: id1 });
@@ -131,8 +149,9 @@ app.post("/remove_friend", async (req, res) => {
   res.json({ message: "2" }); // 성공
 });
 
-app.post("/edit_profile", async (req, res) => {
-  const { id, mes, pf, country, light, TP } = req.body;
+app.post("/edit_profile", authenticateToken, async (req, res) => {
+  const id = req.userId;
+  const { mes, pf, country, light, TP } = req.body;
   const user = await User.findOne({ id });
   if (!user) return res.status(400).json({ message: "-1" });
   user.desc = mes;
@@ -144,8 +163,9 @@ app.post("/edit_profile", async (req, res) => {
   res.status(200).json({ message: "1" });
 });
 
-app.post("/get_chattings", async (req, res) => {
-  const { id1, id2 } = req.body;
+app.post("/get_chattings", authenticateToken, async (req, res) => {
+  const id1 = req.userId;
+  const { id2 } = req.body;
 
   // 채팅 찾기 (양방향)
   const chatting = await Chatting.findOne({
@@ -185,7 +205,7 @@ app.post("/get_chattings", async (req, res) => {
   });
 });
 
-app.post("/get_groupchat_history", async (req, res) => {
+app.post("/get_groupchat_history", authenticateToken, async (req, res) => {
   const { groupId } = req.body;
 
   // 그룹채팅방 찾기
@@ -209,8 +229,9 @@ app.post("/get_groupchat_history", async (req, res) => {
   });
 });
 
-app.post("/create_groupchat", async (req, res) => {
-  const { title, maker } = req.body;
+app.post("/create_groupchat", authenticateToken, async (req, res) => {
+  const { title } = req.body;
+  const maker = req.userId;
 
   if (!title || !maker) {
     return res.status(400).json({ message: "-1", error: "Invalid data" });
@@ -236,8 +257,9 @@ app.post("/create_groupchat", async (req, res) => {
 });
 
 // POST /join_groupchat
-app.post("/join_groupchat", async (req, res) => {
-  const { groupId, userId } = req.body;
+app.post("/join_groupchat", authenticateToken, async (req, res) => {
+  const { groupId } = req.body;
+  const userId = req.userId;
 
   if (!groupId || !userId) {
     return res.status(400).json({ message: "-1", error: "Invalid input" });
@@ -265,8 +287,9 @@ app.post("/join_groupchat", async (req, res) => {
 });
 
 // POST /leave_groupchat
-app.post("/leave_groupchat", async (req, res) => {
-  const { groupId, userId } = req.body;
+app.post("/leave_groupchat", authenticateToken, async (req, res) => {
+  const { groupId } = req.body;
+  const userId = req.userId;
 
   // 유효성 검사
   if (!groupId || !userId) {
@@ -305,8 +328,8 @@ app.post("/ban_user", async (req, res) => {
   res.json({ message: "1" });
 });
 
-app.post("/ban_check", async (req, res) => {
-  const { id } = req.body;
+app.post("/ban_check", authenticateToken, async (req, res) => {
+  const id = req.userId;
   const exists = await Ban.findOne({ id });
   if (exists) return res.status(400).json({ message: "1" });
   res.json({ message: "0" });
@@ -324,7 +347,7 @@ app.post("/translation", async (req, res) => {
   }
 });
 
-app.post("/nova_response", async (req, res) => {
+app.post("/nova_response", authenticateToken, async (req, res) => {
   const {messages} = req.body;
   try {
     const result = await nova_response(messages);
@@ -335,9 +358,9 @@ app.post("/nova_response", async (req, res) => {
   }
 })
 
-app.post("/get_ainova_history", async (req, res) => {
-  const { id } = req.body;
-  
+app.post("/get_ainova_history", authenticateToken, async (req, res) => {
+  const id = req.userId;
+
   try {
     const user = await User.findOne({ id });
     if (!user) {
@@ -354,9 +377,10 @@ app.post("/get_ainova_history", async (req, res) => {
   }
 });
 
-app.post("/update_ainova_history", async (req, res) => {
-  const { id, ainovaHistory } = req.body;
-  
+app.post("/update_ainova_history", authenticateToken, async (req, res) => {
+  const id = req.userId;
+  const { ainovaHistory } = req.body;
+
   try {
     const user = await User.findOne({ id });
     if (!user) {

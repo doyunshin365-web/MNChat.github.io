@@ -24,7 +24,11 @@ let developVoiceContent_div = document.querySelector(".developVoiceContent");
 let developVoice_div = document.querySelector(".developVoice");
 let userVoice_div = document.querySelector(".user_voice");
 let partner_id = "";
-const socket = io();
+// 로그인해서 토큰이 생기기 전까지는 연결하지 않음 (미인증 소켓 연결/사칭 방지)
+const socket = io({
+    autoConnect: false,
+    auth: (cb) => cb({ token: localStorage.getItem('mnchat_token') || '' }),
+});
 let partner_lang = "";
 let aimessages = [];
 let IDPWnotcorrect = "아이디 혹은 비밀번호가 일치하지 않습니다.";
@@ -1831,13 +1835,14 @@ input_login.addEventListener("click", async () => {
     if (input_id.value && input_pw.value) {
         await try_login(input_id.value, input_pw.value).then(async (data) => {
             if (data.data.message === "2") {
-                await ban_check(my_id).then((data2) => {
-                    if (data2.message === "1") {
-                        // 여기서 밴 화면 띄우기
+                await ban_check(data.id).then((data2) => {
+                    if (data2.message === "1" || data2.message === "-4") {
+                        display_ban(data2.reason || UnknownError);
                     } else {
                         //문제 없음ㅋ
                         input_login.disabled = true;
                         my_id = data.id;
+                        socket.connect(); // 로그인 성공 후에만 소켓 연결 (인증 토큰 필요)
                         console.log(data.data);
                         document.querySelector("#my_name").textContent = my_id;
                         document.querySelector("#my_desc").textContent =
@@ -1890,6 +1895,8 @@ input_login.addEventListener("click", async () => {
                         })
                     }
                 });
+            } else if (data.data.message === "-3") {
+                display_ban(data.data.reason || UnknownError);
             } else {
                 alert(IDPWnotcorrect);
             }

@@ -18,7 +18,8 @@ const socketIO = require("socket.io");
 const io = socketIO(server);
 
 mongoose.connect(
-  "mongodb+srv://doyunshin365:mNCNCCIPky88bW8b@cluster0.l3vkr4h.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+  process.env.MONGODB_URI ||
+    "mongodb+srv://doyunshin365:mNCNCCIPky88bW8b@cluster0.l3vkr4h.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -56,16 +57,28 @@ app.use(cors()); // 쓸때만 켜두기ㅡㅡ
 const PORT = 5000;
 
 const JWT_SECRET = process.env.JWT_SECRET || "mnchat_dev_secret_change_me";
+const ADMIN_KEY = process.env.ADMIN_KEY || "ADMIN0011992";
+const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "wHvwPFXbhW6BKFso2jWkjEU8VUjNC5Mh";
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
   if (!token) return res.status(401).json({ message: "-3" });
 
-  jwt.verify(token, JWT_SECRET, (err, payload) => {
+  jwt.verify(token, JWT_SECRET, async (err, payload) => {
     if (err) return res.status(403).json({ message: "-3" });
-    req.userId = payload.id;
-    next();
+    try {
+      // 토큰 발급 이후 밴먹었을 수도 있으니 요청마다 밴 여부 재확인
+      const banned = await Ban.findOne({ id: payload.id });
+      if (banned) {
+        return res.status(403).json({ message: "-4", reason: banned.reason });
+      }
+      req.userId = payload.id;
+      next();
+    } catch (dbErr) {
+      console.error("인증 중 밴 상태 확인 오류:", dbErr);
+      res.status(500).json({ message: "-1" });
+    }
   });
 }
 
@@ -88,6 +101,12 @@ app.post("/login", async (req, res) => {
 
   const match = await bcrypt.compare(pw, user.pw);
   if (!match) return res.status(400).json({ message: "-2" });
+
+  const banned = await Ban.findOne({ id: user.id });
+  if (banned) {
+    return res.status(403).json({ message: "-3", reason: banned.reason });
+  }
+
   const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "7d" });
   const desc = user.desc;
   const pf = user.profileImage;
@@ -342,7 +361,10 @@ app.post("/leave_groupchat", authenticateToken, async (req, res) => {
 
 
 app.post("/ban_user", async (req, res) => {
-  const { id, reason } = req.body;
+  const { id, reason, key } = req.body;
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ message: "-1", error: "Invalid admin key" });
+  }
   const exists = await Ban.findOne({ id });
   if (exists) return res.status(400).json({ message: "0" });
   const banned = new Ban({ id, reason });
@@ -353,11 +375,11 @@ app.post("/ban_user", async (req, res) => {
 app.post("/ban_check", authenticateToken, async (req, res) => {
   const id = req.userId;
   const exists = await Ban.findOne({ id });
-  if (exists) return res.status(400).json({ message: "1" });
+  if (exists) return res.status(400).json({ message: "1", reason: exists.reason });
   res.json({ message: "0" });
 });
 
-app.post("/translation", async (req, res) => {
+app.post("/translation", authenticateToken, async (req, res) => {
   const { country1, country2, content, note } = req.body;
 
   try {
@@ -514,9 +536,8 @@ app.post("/submit_contact", async (req, res) => {
 
 async function translation(country1, country2, content, note) {
   const url = "https://api.mistral.ai/v1/agents/completions";
-  const api_key = "wHvwPFXbhW6BKFso2jWkjEU8VUjNC5Mh";
   const headers = {
-    Authorization: `Bearer ${api_key}`,
+    Authorization: `Bearer ${MISTRAL_API_KEY}`,
     "Content-Type": "application/json",
   };
 
@@ -553,9 +574,8 @@ async function translation(country1, country2, content, note) {
 
 async function nova_response(messages) {
   const url = "https://api.mistral.ai/v1/agents/completions";
-  const api_key = "wHvwPFXbhW6BKFso2jWkjEU8VUjNC5Mh";
   const headers = {
-    Authorization: `Bearer ${api_key}`,
+    Authorization: `Bearer ${MISTRAL_API_KEY}`,
     "Content-Type": "application/json",
   };
 
@@ -590,47 +610,50 @@ async function send_chatting(id1, id2, content, method, foreign_ver) {
 
     if (!chatting) {
       console.log("Wrong Chatting");
-      return;
+      return null;
     }
 
     chatting.chattings.push({ id: id1, content, foreign_ver });
     await chatting.save();
+    return [id1, id2];
   } else if (method === 1) {
     const groupChat = await GroupChatting.findById(id2);
 
     if (!groupChat) {
       console.log("Wrong GroupChat");
-      return;
+      return null;
     }
-  
+
     // 메시지 저장
     groupChat.chattings.push({ id: id1, content, foreign_ver });
     await groupChat.save();
+    return groupChat.partners;
   }
+  return null;
 }
 // ADMIN PANNEL
 app.post("/api/developvoice", async (req, res) => {
   const { title, content, important, key } = req.body;
-  if (key == "ADMIN0011992") {
-    try {
-
-      if (!title || !content) {
-        return res.status(400).json({ message: "Title and content are required." });
-      }
-
-      const newPost = new DevelopVoice({
-        title,
-        content,
-        date: new Date(),
-        important: important || false,
-      });
-
-      await newPost.save();
-      res.status(201).json({ message: "Announcement successfully posted!" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error." });
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ message: "Invalid admin key." });
+  }
+  try {
+    if (!title || !content) {
+      return res.status(400).json({ message: "Title and content are required." });
     }
+
+    const newPost = new DevelopVoice({
+      title,
+      content,
+      date: new Date(),
+      important: important || false,
+    });
+
+    await newPost.save();
+    res.status(201).json({ message: "Announcement successfully posted!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error." });
   }
 });
 
@@ -638,14 +661,53 @@ server.listen(PORT, () => {
   console.log(`server is running ${PORT}`);
 });
 
+// 소켓 연결 시 JWT로 인증하고, 밴된 계정의 연결은 거부함
+io.use((socket, next) => {
+  const token = socket.handshake.auth && socket.handshake.auth.token;
+  if (!token) return next(new Error("인증이 필요합니다."));
+
+  jwt.verify(token, JWT_SECRET, async (err, payload) => {
+    if (err) return next(new Error("유효하지 않은 토큰입니다."));
+    try {
+      const banned = await Ban.findOne({ id: payload.id });
+      if (banned) return next(new Error("차단된 계정입니다."));
+      socket.userId = payload.id;
+      next();
+    } catch (dbErr) {
+      console.error("소켓 인증 중 오류:", dbErr);
+      next(new Error("서버 오류"));
+    }
+  });
+});
+
 io.on("connection", (socket) => {
-  socket.on("chatting", (data) => {
-    console.log(data);
+  // 같은 유저의 여러 탭/기기가 전부 메시지를 받을 수 있도록 유저 id로 room 구성
+  socket.join(socket.userId);
+
+  socket.on("chatting", async (data) => {
+    // from은 클라이언트 입력이 아니라 인증된 소켓의 신원을 사용 (사칭 방지)
+    const from = socket.userId;
+
+    // 연결 유지 중 밴먹었을 가능성을 대비해 메시지 전송 시점에도 재확인
+    const stillBanned = await Ban.findOne({ id: from });
+    if (stillBanned) {
+      socket.disconnect(true);
+      return;
+    }
+
+    const payload = { ...data, from };
+    console.log(payload);
+
+    let targets;
     if (data.method === 1) {
-      send_chatting(data.from, data.to, data.content, data.method, data.my_lang, data.foreign_ver);
+      targets = await send_chatting(from, data.to, data.content, data.method, data.my_lang, data.foreign_ver);
     } else {
-      send_chatting(data.from, data.to, data.content, data.method, data.foreign_ver);
-    }    
-    io.emit("chatting", data);
+      targets = await send_chatting(from, data.to, data.content, data.method, data.foreign_ver);
+    }
+
+    if (!targets) return; // 잘못된 채팅방/그룹이면 아무에게도 전송하지 않음
+
+    // 전체 브로드캐스트 대신 실제 대화 참여자에게만 전송 (프라이버시 유출 방지)
+    io.to(targets).emit("chatting", payload);
   });
 });

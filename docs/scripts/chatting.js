@@ -24,7 +24,11 @@ let developVoiceContent_div = document.querySelector(".developVoiceContent");
 let developVoice_div = document.querySelector(".developVoice");
 let userVoice_div = document.querySelector(".user_voice");
 let partner_id = "";
-const socket = io();
+// 로그인해서 토큰이 생기기 전까지는 연결하지 않음 (미인증 소켓 연결/사칭 방지)
+const socket = io({
+    autoConnect: false,
+    auth: (cb) => cb({ token: localStorage.getItem('mnchat_token') || '' }),
+});
 let partner_lang = "";
 let aimessages = [];
 let IDPWnotcorrect = "아이디 혹은 비밀번호가 일치하지 않습니다.";
@@ -63,6 +67,18 @@ let TranslationFailed = "번역본을 불러오지 못했습니다.";
 
 console.log("콘솔 꺼라. 뭐 입력했다가 밴먹을 수 있어");
 
+/**
+ * 사용자 입력값을 HTML/속성 컨텍스트에 안전하게 넣기 위한 이스케이프 함수 (XSS 방지)
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
 
 
 /**
@@ -74,7 +90,7 @@ function make_partner_image(base64) {
         "beforeend",
         `
         <div class="partner-chat">
-            <img src="${base64}" class="chat-image">
+            <img src="${escapeHtml(base64)}" class="chat-image">
         </div>
     `,
     );
@@ -88,9 +104,9 @@ function make_group_partner_image(base64, partner){
     container.insertAdjacentHTML(
         "beforeend",
         `
-        <p class="group_partner_name">${partner}</p>
+        <p class="group_partner_name">${escapeHtml(partner)}</p>
         <div class="partner-chat">
-            <img src="${base64}" class="chat-image">
+            <img src="${escapeHtml(base64)}" class="chat-image">
         </div>
     `,
     );
@@ -105,7 +121,7 @@ function make_my_image(base64) {
         "beforeend",
         `
         <div class="my-chat">
-            <img src="${base64}" class="chat-image">
+            <img src="${escapeHtml(base64)}" class="chat-image">
         </div>
     `,
     );
@@ -120,7 +136,7 @@ function make_my_chat(content) {
         "beforeend",
         `
         <div class="my-chat">
-            <p>${content}</p>
+            <p>${escapeHtml(content)}</p>
         </div>
     `,
     );
@@ -135,7 +151,7 @@ function make_partner_chat(content) {
         "beforeend",
         `
         <div class="partner-chat">
-            <p>${content}</p>
+            <p>${escapeHtml(content)}</p>
         </div>
     `,
     );
@@ -150,7 +166,7 @@ function AImake_my_chat(content) {
         "beforeend",
         `
         <div class="ai-my-chat">
-            <p>${content}</p>
+            <p>${escapeHtml(content)}</p>
         </div>
     `,
     );
@@ -165,7 +181,7 @@ function AImake_partner_chat(content) {
         "beforeend",
         `
         <div class="partner-chat">
-            <p>${content}</p>
+            <p>${escapeHtml(content)}</p>
         </div>
     `,
     );
@@ -179,9 +195,9 @@ function make_group_partner_chat(content, partner) {
     container.insertAdjacentHTML(
         "beforeend",
         `
-        <p class="group_partner_name">${partner}</p>
+        <p class="group_partner_name">${escapeHtml(partner)}</p>
         <div class="partner-chat">
-            <p>${content}</p>
+            <p>${escapeHtml(content)}</p>
         </div>
     `,
     );
@@ -197,12 +213,12 @@ function make_partner_chat_otherlang(content, partner_lang, partner, foreign_ver
     const div = document.createElement("div");
     div.classList.add("partner-chat");
     div.innerHTML = `
-        <p class="content">${content}</p>
-        <button class="show_translate">${CheckTranslate}</button>
+        <p class="content">${escapeHtml(content)}</p>
+        <button class="show_translate">${escapeHtml(CheckTranslate)}</button>
     `;
     container.appendChild(div);
 
-    
+
 
 
     // 바로 이벤트 붙이기
@@ -244,15 +260,15 @@ function make_group_partner_chat_otherlang(content, partner_lang, partner, forei
     // 이름 먼저 추가
     container.insertAdjacentHTML(
         "beforeend",
-        `<p class="group_partner_name">${partner}</p>`
+        `<p class="group_partner_name">${escapeHtml(partner)}</p>`
     );
 
     // 채팅 박스 생성
     const div = document.createElement("div");
     div.classList.add("partner-chat");
     div.innerHTML = `
-        <p class="content">${content}</p>
-        <button class="show_translate">${CheckTranslate}</button>
+        <p class="content">${escapeHtml(content)}</p>
+        <button class="show_translate">${escapeHtml(CheckTranslate)}</button>
     `;
     container.appendChild(div);
 
@@ -690,11 +706,11 @@ async function display_developervoice_content(id) {
         }
     }
     
-    // 줄바꿈 처리
-    const converted = displayContent
+    // 줄바꿈 처리 (이스케이프 후 개행만 <br>로 치환)
+    const converted = escapeHtml(displayContent)
         .replace(/\r\n|\n|\r/g, "<br>")
         .replace(/\\n/g, "<br>");
-    
+
     titleEl.textContent = displayTitle;
     contentEl.innerHTML = converted;
     
@@ -735,7 +751,7 @@ async function display_friendlist() {
         let translateBtnHtml = "";
         if (friend.lang && friend.lang !== my_lang) {
             translateBtnHtml = `
-                <button class="translate-desc-btn" data-lang="${friend.lang}" data-desc="${friend.desc}">
+                <button class="translate-desc-btn" data-lang="${escapeHtml(friend.lang)}" data-desc="${escapeHtml(friend.desc)}">
                     <img src="./svgs/translate_desc.svg" alt="번역" class="translate-icon">
                 </button>
             `;
@@ -744,14 +760,14 @@ async function display_friendlist() {
         friends_list.insertAdjacentHTML(
             "beforeend",
             `
-            <div class="user-table" data-id="${friend.id}">
-                <img src="${profileSrc}" class="user-icon">
+            <div class="user-table" data-id="${escapeHtml(friend.id)}">
+                <img src="${escapeHtml(profileSrc)}" class="user-icon">
                 <div class="user-info">
-                    <strong class="user-name">${friend.id}</strong>
-                    <p class="user-description">${friend.desc}</p>
+                    <strong class="user-name">${escapeHtml(friend.id)}</strong>
+                    <p class="user-description">${escapeHtml(friend.desc)}</p>
                 </div>
                 ${translateBtnHtml}
-                <button class="delete-friend-btn" data-id="${friend.id}">
+                <button class="delete-friend-btn" data-id="${escapeHtml(friend.id)}">
                     <img src="./svgs/delete_friend.svg" alt="삭제" class="delete-icon">
                 </button>
             </div>
@@ -1011,12 +1027,12 @@ async function display_grouplist() {
         groups_container.insertAdjacentHTML(
             "beforeend",
             `
-            <div class="grouptable" data-id="${group.groupId}">
+            <div class="grouptable" data-id="${escapeHtml(group.groupId)}">
                 <div class="group_info">
-                    <strong class="group_name">${group.name}</strong>
-                    <p class="group_id">${group.groupId}</strong>
+                    <strong class="group_name">${escapeHtml(group.name)}</strong>
+                    <p class="group_id">${escapeHtml(group.groupId)}</strong>
                 </div>
-                <button class="delete-group-btn" data-id="${group.groupId}">
+                <button class="delete-group-btn" data-id="${escapeHtml(group.groupId)}">
                     <img src="./svgs/delete_group.svg" alt="삭제" class="delete-icon">
                 </button>
             </div>
@@ -1819,13 +1835,14 @@ input_login.addEventListener("click", async () => {
     if (input_id.value && input_pw.value) {
         await try_login(input_id.value, input_pw.value).then(async (data) => {
             if (data.data.message === "2") {
-                await ban_check(my_id).then((data2) => {
-                    if (data2.message === "1") {
-                        // 여기서 밴 화면 띄우기
+                await ban_check(data.id).then((data2) => {
+                    if (data2.message === "1" || data2.message === "-4") {
+                        display_ban(data2.reason || UnknownError);
                     } else {
                         //문제 없음ㅋ
                         input_login.disabled = true;
                         my_id = data.id;
+                        socket.connect(); // 로그인 성공 후에만 소켓 연결 (인증 토큰 필요)
                         console.log(data.data);
                         document.querySelector("#my_name").textContent = my_id;
                         document.querySelector("#my_desc").textContent =
@@ -1878,6 +1895,8 @@ input_login.addEventListener("click", async () => {
                         })
                     }
                 });
+            } else if (data.data.message === "-3") {
+                display_ban(data.data.reason || UnknownError);
             } else {
                 alert(IDPWnotcorrect);
             }

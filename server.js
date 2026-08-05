@@ -57,7 +57,7 @@ app.use(cors()); // 쓸때만 켜두기ㅡㅡ
 const PORT = 5000;
 
 const JWT_SECRET = process.env.JWT_SECRET || "mnchat_dev_secret_change_me";
-const ADMIN_KEY = process.env.ADMIN_KEY || "ADMIN0011992";
+const ADMIN_ID = process.env.ADMIN_ID || "admin";
 const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "wHvwPFXbhW6BKFso2jWkjEU8VUjNC5Mh";
 
 function authenticateToken(req, res, next) {
@@ -80,6 +80,14 @@ function authenticateToken(req, res, next) {
       res.status(500).json({ message: "-1" });
     }
   });
+}
+
+// authenticateToken 다음에 붙여서 사용: admin 계정으로 로그인한 요청만 통과시킴
+function requireAdmin(req, res, next) {
+  if (req.userId !== ADMIN_ID) {
+    return res.status(403).json({ message: "-1", error: "Admin only" });
+  }
+  next();
 }
 
 //로그인 구현
@@ -360,11 +368,8 @@ app.post("/leave_groupchat", authenticateToken, async (req, res) => {
 });
 
 
-app.post("/ban_user", async (req, res) => {
-  const { id, reason, key } = req.body;
-  if (key !== ADMIN_KEY) {
-    return res.status(403).json({ message: "-1", error: "Invalid admin key" });
-  }
+app.post("/ban_user", authenticateToken, requireAdmin, async (req, res) => {
+  const { id, reason } = req.body;
   const exists = await Ban.findOne({ id });
   if (exists) return res.status(400).json({ message: "0" });
   const banned = new Ban({ id, reason });
@@ -632,11 +637,8 @@ async function send_chatting(id1, id2, content, method, foreign_ver) {
   return null;
 }
 // ADMIN PANNEL
-app.post("/api/developvoice", async (req, res) => {
-  const { title, content, important, key } = req.body;
-  if (key !== ADMIN_KEY) {
-    return res.status(403).json({ message: "Invalid admin key." });
-  }
+app.post("/api/developvoice", authenticateToken, requireAdmin, async (req, res) => {
+  const { title, content, important } = req.body;
   try {
     if (!title || !content) {
       return res.status(400).json({ message: "Title and content are required." });

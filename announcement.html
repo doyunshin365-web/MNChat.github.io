@@ -10,28 +10,81 @@
       input, textarea { width: 100%; margin-bottom: 10px; padding: 10px; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; }
       button { background: #4caf50; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
       button:hover { background: #45a049; }
+      button:disabled { background: #aaa; cursor: not-allowed; }
       .checkbox { display: flex; align-items: center; gap: 10px; }
+      .login-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+      .login-status { font-size: 0.9rem; color: #4caf50; font-weight: bold; }
     </style>
   </head>
   <body>
     <div class="container">
       <h2>MNChat 공지사항 등록</h2>
+
+      <div class="login-section">
+        <input type="text" id="admin-id" placeholder="관리자 계정 아이디" />
+        <input type="password" id="admin-pw" placeholder="비밀번호" />
+        <button id="login-btn">관리자 로그인</button>
+        <p id="login-result"></p>
+      </div>
+
       <input type="text" id="title" placeholder="제목을 입력하세요" />
       <textarea id="content" rows="6" placeholder="내용을 입력하세요"></textarea>
       <div class="checkbox">
         <input type="checkbox" id="important" />
         <label for="important">중요 공지사항으로 등록</label>
       </div>
-      <button id="submit">등록하기</button>
+      <button id="submit" disabled>등록하기 (먼저 로그인해주세요)</button>
       <p id="result"></p>
     </div>
 
     <script>
+      const API_BASE = "http://localhost:5000";
+      let adminToken = null;
+
+      document.getElementById("login-btn").addEventListener("click", async () => {
+        const id = document.getElementById("admin-id").value.trim();
+        const pw = document.getElementById("admin-pw").value;
+        const loginResult = document.getElementById("login-result");
+        const submitBtn = document.getElementById("submit");
+
+        if (!id || !pw) {
+          loginResult.textContent = "아이디와 비밀번호를 입력해주세요.";
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, pw }),
+          });
+          const data = await res.json();
+
+          if (data.message === "2" && data.token) {
+            adminToken = data.token;
+            loginResult.textContent = `${id}(으)로 로그인됨.`;
+            loginResult.className = "login-status";
+            submitBtn.disabled = false;
+            submitBtn.textContent = "등록하기";
+          } else if (data.message === "-3") {
+            loginResult.textContent = "차단된 계정입니다.";
+          } else {
+            loginResult.textContent = "로그인 실패. 관리자 계정 정보를 다시 확인해주세요.";
+          }
+        } catch (err) {
+          loginResult.textContent = "서버 연결에 실패했습니다.";
+        }
+      });
+
       document.getElementById("submit").addEventListener("click", async () => {
         const title = document.getElementById("title").value.trim();
         const content = document.getElementById("content").value.trim();
         const important = document.getElementById("important").checked;
-        const key = "ADMIN0011992";
+
+        if (!adminToken) {
+          document.getElementById("result").textContent = "먼저 관리자 로그인을 해주세요.";
+          return;
+        }
 
         if (!title || !content) {
           document.getElementById("result").textContent = "제목과 내용을 모두 입력해주세요.";
@@ -39,10 +92,13 @@
         }
 
         try {
-          const res = await fetch("localhost:3000/api/developvoice", {
+          const res = await fetch(`${API_BASE}/api/developvoice`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title, content, important, key}),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${adminToken}`,
+            },
+            body: JSON.stringify({ title, content, important }),
           });
 
           const data = await res.json();
@@ -52,6 +108,8 @@
             document.getElementById("title").value = "";
             document.getElementById("content").value = "";
             document.getElementById("important").checked = false;
+          } else if (res.status === 403) {
+            document.getElementById("result").textContent = "admin 계정만 공지사항을 등록할 수 있습니다.";
           }
         } catch (err) {
           document.getElementById("result").textContent = "서버 오류가 발생했습니다.";

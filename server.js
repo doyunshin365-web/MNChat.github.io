@@ -28,6 +28,28 @@ mongoose.connect(
 app.use(express.static(path.join(__dirname, "docs")));
 app.use(express.json());
 
+// NoSQL Injection 방지: req.body에서 MongoDB 연산자($ne, $gt, $regex 등)나
+// 점(.)이 포함된 키를 재귀적으로 제거함
+function sanitizeInput(value) {
+  if (Array.isArray(value)) {
+    value.forEach(sanitizeInput);
+  } else if (value && typeof value === "object") {
+    for (const key of Object.keys(value)) {
+      if (key.startsWith("$") || key.includes(".")) {
+        delete value[key];
+      } else {
+        sanitizeInput(value[key]);
+      }
+    }
+  }
+  return value;
+}
+
+app.use((req, res, next) => {
+  sanitizeInput(req.body);
+  next();
+});
+
 const cors = require("cors");
 app.use(cors()); // 쓸때만 켜두기ㅡㅡ
 
